@@ -1,0 +1,15 @@
+{
+  "name": "vidclip",
+  "version": "1.0.0",
+  "description": "A highly customizable, lightweight screen recorder.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Terry Kim",
+  "license": "MIT",
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "ffmpeg": "^0.0.4"
+  }
+}
