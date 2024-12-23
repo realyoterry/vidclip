@@ -1,11 +1,13 @@
-![vidclip](/public/vidclip.png)
+<p align="center">
+<img src="/public/vidclip.png" width="546"></img>
+</p>
 
-<div style="text-align:center; margin-top:-10px;">
+<p align="center">
     <img src="https://img.shields.io/npm/v/vidclip?style=for-the-badge"></img>
     <img src="https://img.shields.io/github/license/realyoterry/vidclip?style=for-the-badge"></img>
-</div>
-
-<p style="text-align:center; margin-top:25px;">A highly customizable, lightweight screen & audio recorder.</p>
+</p>
+<br />
+<p align="center">A highly customizable, lightweight screen & audio recorder.</p>
 
 ## Features
 
