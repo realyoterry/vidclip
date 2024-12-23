@@ -1,4 +1,4 @@
-const VideoRecorder = require('../src/index.js');
+const { VideoRecorder } = require('../src/index.js');
 
 const recorder = new VideoRecorder({
     outputPath: './testRecordings',
@@ -8,6 +8,8 @@ const recorder = new VideoRecorder({
     resolution: '1280x720',
     verbose: true,
     includeUUID: false,
+    recordAudio: true,
+    volume: 2.0,
 });
 
 recorder.start();
