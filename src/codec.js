@@ -1,11 +1,12 @@
 'use strict';
 
 const os = require('os');
+const RecordingError = require('./errors'); // Importing the RecordingError class
 
 /**
  * Gets the default screen source based on the operating system.
  * @returns {string} The default screen source string for FFmpeg.
- * @throws {Error} If the platform is unsupported.
+ * @throws {RecordingError} If the platform is unsupported.
  */
 function getDefaultSource() {
     const platform = os.platform();
@@ -13,7 +14,7 @@ function getDefaultSource() {
         case 'win32': return 'desktop'; // Windows default screen
         case 'darwin': return '0:'; // macOS default screen
         case 'linux': return ':0.0'; // Linux default screen
-        default: throw new Error('Unsupported platform for recording.');
+        default: throw new RecordingError(400, 'Unsupported platform for recording.'); // Throw RecordingError
     }
 }
 
@@ -35,14 +36,14 @@ function getDefaultAudioSource() {
  * Gets the platform-specific FFmpeg input type.
  * @param {string} platform - The operating system platform.
  * @returns {string} The FFmpeg input type string based on the platform.
- * @throws {Error} If the platform is unsupported.
+ * @throws {RecordingError} If the platform is unsupported.
  */
 function getPlatformInput(platform) {
     switch (platform) {
         case 'win32': return 'gdigrab'; // Windows screen capture input
         case 'darwin': return 'avfoundation'; // macOS screen capture input
         case 'linux': return 'x11grab'; // Linux screen capture input
-        default: throw new Error('Unsupported platform for recording.');
+        default: throw new RecordingError(400, 'Unsupported platform for recording.'); // Throw RecordingError
     }
 }
 

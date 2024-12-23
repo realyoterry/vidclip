@@ -1,3 +1,7 @@
+/**
+ * @module VideoRecorder
+ */
+
 'use strict';
 
 const os = require('os');
@@ -9,6 +13,11 @@ const { getDefaultSource, getDefaultAudioSource, getPlatformInput, getAudioComma
 const { ensureOutputDirExists, getFilePath } = require('./output');
 const RecordingError = require('./errors');
 
+/**
+ * Lists available audio devices based on the platform.
+ * @returns {Promise<string[]>} A promise that resolves with a list of available audio devices.
+ * @throws {Error} If the platform is unsupported.
+ */
 function listAudioDevices() {
     const platform = os.platform();
     let command = '';
@@ -58,17 +67,18 @@ class VideoRecorder extends EventEmitter {
      * @param {Object} options - Configuration options for the video recorder.
      * @param {string} [options.outputPath='./recordings'] - The directory where recordings will be saved.
      * @param {string} [options.fileName='output'] - The base filename for the recorded video.
-     * @param {string} [options.format='mp4'] - The format for the output video.
-     * @param {number} [options.frameRate=30] - The frame rate for the recording.
-     * @param {string} [options.codec='libx264'] - The video codec to use for recording.
-     * @param {string} [options.preset='ultrafast'] - The encoding preset for FFmpeg.
-     * @param {string} [options.resolution='1920x1080'] - The resolution of the recorded video.
+     * @param {string} [options.format='mp4'] - The format for the output video (e.g., 'mp4').
+     * @param {number} [options.frameRate=30] - The frame rate for the recording (e.g., 30).
+     * @param {string} [options.codec='libx264'] - The video codec to use for recording (e.g., 'libx264').
+     * @param {string} [options.preset='ultrafast'] - The encoding preset for FFmpeg (e.g., 'ultrafast').
+     * @param {string} [options.resolution='1920x1080'] - The resolution of the recorded video (e.g., '1920x1080').
      * @param {boolean} [options.verbose=false] - If true, logs FFmpeg output to the console.
      * @param {boolean} [options.includeUUID=true] - If true, includes a UUID in the filename.
      * @param {boolean} [options.recordAudio=false] - If true, records audio along with the video.
      * @param {string|null} [options.audioSource=null] - The audio source for recording, null uses default.
-     * @param {number} [options.volume=1.0] - The audio volume multiplier. Has to be between 0.0 and 2.0.
+     * @param {number} [options.volume=1.0] - The audio volume multiplier (between 0.0 and 2.0).
      * @param {Array<string>} [options.extraArgs=[]] - Additional arguments to pass to FFmpeg.
+     * @throws {RecordingError} Throws error if any configuration is invalid.
      */
     constructor({
         outputPath = './recordings',
@@ -95,11 +105,11 @@ class VideoRecorder extends EventEmitter {
         }
 
         if (!allowedCodecs.includes(codec)) {
-            throw new RecordingError(400, `Invalid codec: ${this.codec}`);
+            throw new RecordingError(400, `Invalid codec: ${codec}`);
         }
 
         if (!allowedPresets.includes(preset)) {
-            throw new RecordingError(400, `Invalid preset: ${this.preset}`);
+            throw new RecordingError(400, `Invalid preset: ${preset}`);
         }
 
         if (resolution && !/^\d{1,5}x\d{1,5}$/.test(resolution)) {
@@ -144,16 +154,16 @@ class VideoRecorder extends EventEmitter {
      * @returns {string} The FFmpeg command to execute.
      */
     getRecordingCommand(filePath) {
+        const platform = os.platform();
+        const videoInput = shellQuote.quote([this.source]);
+        const audioOptions = this.recordAudio ? this.getAudioOptions(platform, this.audioSource).replace(/'/g, '"') : '';
         const codecOptions = `-c:v ${shellQuote.quote([this.codec])} -preset ${shellQuote.quote([this.preset])} -pix_fmt yuv420p`;
         const resolution = this.resolution ? `-s ${shellQuote.quote([this.resolution])}` : '';
         const frameRate = shellQuote.quote([this.frameRate.toString()]);
-        const videoInput = shellQuote.quote([videoInput]);
-        const audioOptions = audioOptions ? audioOptions.split(' ').map(arg => shellQuote.quote([arg])).join(' ') : '';
         const extraArgs = this.extraArgs.map(arg => shellQuote.quote([arg])).join(' ');
-        const filePath = shellQuote.quote([filePath]);
+        const outputPath = shellQuote.quote([filePath]);
 
-
-        return `${ffmpeg} -y -f ${getPlatformInput(platform)} -framerate ${frameRate} -i ${videoInput} ${audioOptions} ${resolution} ${codecOptions} ${extraArgs} ${filePath}`;
+        return `${ffmpeg} -y -f ${getPlatformInput(platform)} -framerate ${frameRate} -i ${videoInput} ${audioOptions} ${resolution} ${codecOptions} ${extraArgs} ${outputPath}`;
     }
 
     /**
@@ -163,6 +173,8 @@ class VideoRecorder extends EventEmitter {
      * @returns {string} The audio options for FFmpeg.
      */
     getAudioOptions(platform, audioInput) {
+        if (!this.recordAudio) return '';
+
         let audioOptions = '';
 
         switch (platform) {
@@ -176,8 +188,7 @@ class VideoRecorder extends EventEmitter {
                 audioOptions = `-f pulse -i ${shellQuote.quote([audioInput])}`;
                 break;
             default:
-                audioOptions = '';
-                break;
+                throw new RecordingError(400, `Unsupported platform for audio: ${platform}`);
         }
 
         if (this.volume !== 1.0) {
@@ -190,6 +201,7 @@ class VideoRecorder extends EventEmitter {
     /**
      * Starts the video recording process.
      * Emits 'error' if the recording cannot start.
+     * @throws {RecordingError} Throws error if recording already in progress or if FFmpeg command fails.
      */
     start() {
         if (this.isRecording) {
@@ -239,6 +251,7 @@ class VideoRecorder extends EventEmitter {
     /**
      * Stops the video recording process.
      * Emits 'error' if no active recording is found.
+     * @throws {RecordingError} Throws error if no active recording to stop.
      */
     stop() {
         if (!this.isRecording) {

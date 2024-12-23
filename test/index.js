@@ -4,13 +4,13 @@ const recorder = new VideoRecorder({
     outputPath: './testRecordings',
     fileName: 'testRecording',
     format: 'mp4',
-    frameRate: 30,
+    frameRate: 15,
     resolution: '1280x720',
+    preset: 'medium',
     verbose: true,
     includeUUID: false,
     recordAudio: true,
-    audioSource: "Intel® Smart Sound Technology for Bluetooth® Audio",
-    volume: 2.0,
+    audioSource: "Stereo Mix (Realtek(R) Audio)",
 });
 
 recorder.start();
