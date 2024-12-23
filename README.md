@@ -1,10 +1,12 @@
 <p align="center">
-    <img src="/public/vidclip.png" width="546"></img>
+    <img src="https://raw.githubusercontent.com/realyoterry/vidclip/main/public/vidclip.png" width="546"></img>
 </p>
 
 <p align="center">
-    <img src="https://img.shields.io/npm/v/vidclip?style=for-the-badge"></img>
-    <img src="https://img.shields.io/github/license/realyoterry/vidclip?style=for-the-badge"></img>
+    <img src="https://img.shields.io/npm/v/vidclip"></img>
+    <img src="https://img.shields.io/github/license/realyoterry/vidclip"></img>
+    <img src="https://img.shields.io/npm/d18m/vidclip.svg?maxAge=3600"></img>
+    <img src="https://github.com/realyoterry/vidclip/actions/workflows/nodejs.yml/badge.svg"></img>
 </p>
 <br />
 <p align="center">A highly customizable, lightweight screen & audio recorder.</p>
@@ -102,8 +104,9 @@ Now when you run it, the mp4 file would be saved in the `testRecordings` folder.
 | `includeUUID`   | Append a random unique identifier to the file name (`true`/`false`).    | *Boolean*  |
 | `recordAudio`   | Include audio in the recording (`true`/`false`).                        | *Boolean*  |
 | `audioSource`   | Name of the audio input device for recording.                           | *String*   |
-| `volume`        | Control how loud you want the audio to be. (`0.0`-`2.0`)                    | *Array*    |
+| `volume`        | Control how loud you want the audio to be. (`0.0`-`2.0`)                | *Array*    |
 | `extraArgs`     | Additional settings for advanced configurations.                        | *Array*    |
+
 
 If you want to use other audio sources, run:
 
