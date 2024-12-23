@@ -4,9 +4,48 @@ const os = require('os');
 const ffmpeg = require('@ffmpeg-installer/ffmpeg').path;
 const { exec } = require('child_process');
 const { EventEmitter } = require('events');
-const { getDefaultSource, getDefaultAudioSource, getPlatformInput } = require('./codec');
+const { getDefaultSource, getDefaultAudioSource, getPlatformInput, getAudioCommand } = require('./codec');
 const { ensureOutputDirExists, getFilePath } = require('./output');
 const RecordingError = require('./errors');
+
+function listAudioDevices() {
+    const platform = os.platform();
+    let command = '';
+
+    switch (platform) {
+        case 'win32':
+            command = `${ffmpeg} -list_devices true -f dshow -i video="dummy"`;
+            break;
+        case 'darwin':
+            command = `${ffmpeg} -f avfoundation -list_devices true -i ""`;
+            break;
+        case 'linux':
+            command = `pactl list sources short`;
+            break;
+        default:
+            return Promise.reject('Unsupported platform.');
+    }
+
+    return new Promise((resolve) => {
+        exec(command, (error, stdout, stderr) => {
+            let output = platform === 'linux' ? stdout : stderr;
+            let devices = [];
+            let match;
+
+            const regex = /"([^"]+)"/g;
+
+            while ((match = regex.exec(output)) !== null) {
+                const deviceName = match[1];
+
+                if (!deviceName.includes('@device')) {
+                    devices.push(deviceName);
+                }
+            }
+
+            resolve(devices.sort());
+        });
+    });
+}
 
 /**
  * VideoRecorder class for recording video with FFmpeg.
@@ -196,4 +235,5 @@ class VideoRecorder extends EventEmitter {
 
 module.exports = {
     VideoRecorder,
+    listAudioDevices,
 };

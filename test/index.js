@@ -9,6 +9,7 @@ const recorder = new VideoRecorder({
     verbose: true,
     includeUUID: false,
     recordAudio: true,
+    audioSource: "Intel® Smart Sound Technology for Bluetooth® Audio",
     volume: 2.0,
 });
 

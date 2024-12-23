@@ -1,5 +1,5 @@
 <p align="center">
-<img src="/public/vidclip.png" width="546"></img>
+    <img src="/public/vidclip.png" width="546"></img>
 </p>
 
 <p align="center">
@@ -105,17 +105,19 @@ Now when you run it, the mp4 file would be saved in the `testRecordings` folder.
 | `volume`        | Control how loud you want the audio to be. (`0.0`-`2.0`)                    | *Array*    |
 | `extraArgs`     | Additional settings for advanced configurations.                        | *Array*    |
 
-If you want to record your voice, run:
+If you want to use other audio sources, run:
 
 ```js
-console.log(record.getAudioSources());
+listAudioDevices()
+    .then(console.log)
+    .catch(console.error);
 ```
 
-Then, copy the name of the one you would like to use. (Make sure it is enabled), set it as the `audioSource`, then boom! That's done.
+Then, set `audioSource` to the desired source you would like to use.
 
 ## Contributing
 
-Contributions are welcome to everyone!! Please make a PR at the [GitHub repository](https://github.com/realyoterry/vidclip) after you have made your changes.
+Contributions are welcome to everyone! Please make a PR at the [GitHub repository](https://github.com/realyoterry/vidclip) after you have made your changes.
 
 ## License
 
