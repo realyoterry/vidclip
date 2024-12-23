@@ -2,10 +2,13 @@
 
 const fs = require('fs');
 const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 
 /**
  * Ensures that the output directory exists. Creates the directory if it doesn't exist.
  * @param {string} outputPath - The path of the output directory to check and create if necessary.
+ * @example
+ * ensureOutputDirExists('./recordings');
  */
 function ensureOutputDirExists(outputPath) {
     if (!fs.existsSync(outputPath)) {
@@ -20,15 +23,18 @@ function ensureOutputDirExists(outputPath) {
  * @param {string} format - The format/extension of the file (e.g., 'mp4').
  * @param {boolean} includeUUID - Whether to include a UUID in the file name.
  * @returns {string} The full path of the file including the file name and extension.
+ * @example
+ * const filePath = getFilePath('./recordings', 'output', 'mp4', true);
+ * console.log(filePath);
  */
 function getFilePath(outputPath, fileName, format, includeUUID) {
     const finalFileName = includeUUID
-        ? `${fileName}_${require('uuid').v4()}.${format}`
+        ? `${fileName}_${uuidv4()}.${format}`
         : `${fileName}.${format}`;
     return path.join(outputPath, finalFileName);
 }
 
 module.exports = {
     ensureOutputDirExists,
-    getFilePath
+    getFilePath,
 };

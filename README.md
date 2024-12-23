@@ -19,7 +19,7 @@
 - Audio recording from microphone and/or system sound
 - Lightweight and minimal resource usage
 
-#### *Before you get started:
+#### \*Before you get started:
 
 - Familiarize yourself with the [Node.js basics](https://developer.mozilla.org/en-US/docs/Web/JavaScript).
 - Please be respectful and kind in our community.
@@ -40,7 +40,7 @@
 
 ## Installation
 
-*Make sure Node.js and NPM have been installed before starting.*
+_Make sure Node.js and NPM have been installed before starting._
 
 ```bash
 npm install vidclip
@@ -59,7 +59,9 @@ bun add vidclip
 Here's a quick example on how to use the basic features of this package. Full and detailed documentation is on the [vidclip documentation.](https://vidclip.js.org)
 
 ### 1. Import the application:
+
 Make sure you have installed the package first.
+
 ```js
 // If you use CommonJS...
 const record = require('vidclip');
@@ -67,12 +69,15 @@ const record = require('vidclip');
 // If you use ES Modules...
 import record from 'vidclip';
 ```
+
 By default, you would use CommonJS, but if you wish to use ESM, add the
+
 ```json
 {
-    "type": "module",
+    "type": "module"
 }
 ```
+
 property into your `package.json` file.
 
 ### 2. Basic Functions
@@ -105,29 +110,26 @@ Now when you run it, the mp4 file would be saved in the `testRecordings` folder.
 
 **Windows users** - PLEASE make sure you have Stereo Mix enabled. To enable it, go to `Settings > System > Sound > More sound settings > Recording > Stereo Mix`. The stereo mix is for recordig desktop audio.
 
-| **Parameter**   | **Description**                                                         | **Type**   |
-|-----------------|-------------------------------------------------------------------------|-----------:|
-| `outputPath`    | Directory where the recording will be saved.                            | *String*   |
-| `fileName`      | Desired name for the recording file.                                    | *String*   |
-| `format`        | File format for the recording (e.g., mp4, avi).                         | *String*   |
-| `frameRate`     | Frame rate (FPS) for the recording.                                     | *Number*   |
-| `codec`         | The codec the encoder uses.                                             | *String*   |
-| `preset`        | The speed of the recording upload.                                      | *String*   |
-| `resolution`    | Dimensions of the recording (e.g., 1920x1080).                          | *String*   |
-| `verbose`       | Enable logs for detailed information (`true`/`false`).                  | *Boolean*  |
-| `includeUUID`   | Append a random unique identifier to the file name (`true`/`false`).    | *Boolean*  |
-| `recordAudio`   | Include audio in the recording (`true`/`false`).                        | *Boolean*  |
-| `audioSource`   | Name of the audio input device for recording.                           | *String*   |
-| `volume`        | Control how loud you want the audio to be. (`0.0`-`2.0`)                | *Array*    |
-| `extraArgs`     | Additional settings for advanced configurations.                        | *Array*    |
-
+| **Parameter** | **Description**                                                      |  **Type** |
+| ------------- | -------------------------------------------------------------------- | --------: |
+| `outputPath`  | Directory where the recording will be saved.                         |  _String_ |
+| `fileName`    | Desired name for the recording file.                                 |  _String_ |
+| `format`      | File format for the recording (e.g., mp4, avi).                      |  _String_ |
+| `frameRate`   | Frame rate (FPS) for the recording.                                  |  _Number_ |
+| `codec`       | The codec the encoder uses.                                          |  _String_ |
+| `preset`      | The speed of the recording upload.                                   |  _String_ |
+| `resolution`  | Dimensions of the recording (e.g., 1920x1080).                       |  _String_ |
+| `verbose`     | Enable logs for detailed information (`true`/`false`).               | _Boolean_ |
+| `includeUUID` | Append a random unique identifier to the file name (`true`/`false`). | _Boolean_ |
+| `recordAudio` | Include audio in the recording (`true`/`false`).                     | _Boolean_ |
+| `audioSource` | Name of the audio input device for recording.                        |  _String_ |
+| `volume`      | Control how loud you want the audio to be. (`0.0`-`2.0`)             |   _Array_ |
+| `extraArgs`   | Additional settings for advanced configurations.                     |   _Array_ |
 
 If you want to use other audio sources, run:
 
 ```js
-listAudioDevices()
-    .then(console.log)
-    .catch(console.error);
+listAudioDevices().then(console.log).catch(console.error);
 ```
 
 Then, set `audioSource` to the desired source you would like to use.

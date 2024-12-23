@@ -1,0 +1,11 @@
+/.github
+/public
+/test
+/.vscode
+/package-lock.json
+/SECURITY.md
+/LICENSE
+/docs
+/.prettierrc
+/.gitignore
+/.prettierignore

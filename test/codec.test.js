@@ -1,4 +1,8 @@
-const { getDefaultSource, getDefaultAudioSource, getPlatformInput } = require('../src/codec');
+const {
+    getDefaultSource,
+    getDefaultAudioSource,
+    getPlatformInput,
+} = require('../src/codec');
 const os = require('os');
 
 jest.mock('os', () => ({
@@ -17,7 +21,9 @@ describe('codec.js', () => {
         expect(getDefaultSource()).toBe(':0.0');
 
         os.platform.mockReturnValue('unknown');
-        expect(() => getDefaultSource()).toThrowError('Unsupported platform for recording.');
+        expect(() => getDefaultSource()).toThrowError(
+            'Unsupported platform for recording.',
+        );
     });
 
     test('getDefaultAudioSource returns correct value based on OS', () => {
@@ -31,7 +37,9 @@ describe('codec.js', () => {
         expect(getDefaultAudioSource()).toBe('pulse');
 
         os.platform.mockReturnValue('unknown');
-        expect(getDefaultAudioSource()).toBeNull();
+        expect(() => getDefaultAudioSource()).toThrowError(
+            'Unsupported platform for capturing audio.',
+        );
     });
 
     test('getPlatformInput returns correct value based on OS', () => {
@@ -45,6 +53,8 @@ describe('codec.js', () => {
         expect(getPlatformInput('linux')).toBe('x11grab');
 
         os.platform.mockReturnValue('unknown');
-        expect(() => getPlatformInput('unknown')).toThrowError('Unsupported platform for recording.');
+        expect(() => getPlatformInput('unknown')).toThrowError(
+            'Unsupported platform for recording.',
+        );
     });
 });

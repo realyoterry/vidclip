@@ -2,13 +2,15 @@
 
 const { VideoRecorder } = require('../src/index');
 const { exec } = require('child_process');
-const RecordingError = require('../src/errors');
+const RecordingError = require('../src/RecordingError');
 
 jest.mock('child_process');
 
 jest.mock('../src/codec', () => ({
     getDefaultSource: jest.fn().mockReturnValue('desktop'),
-    getDefaultAudioSource: jest.fn().mockReturnValue('Stereo Mix (Realtek(R) Audio)'),
+    getDefaultAudioSource: jest
+        .fn()
+        .mockReturnValue('Stereo Mix (Realtek(R) Audio)'),
     getPlatformInput: jest.fn().mockReturnValue('gdigrab'),
 }));
 
@@ -34,14 +36,20 @@ describe('VideoRecorder', () => {
         recorder.start();
 
         expect(recorder.isRecording).toBe(true);
-        expect(exec).toHaveBeenCalledWith(expect.stringContaining('ffmpeg'), expect.anything());
+        expect(exec).toHaveBeenCalledWith(
+            expect.stringContaining('ffmpeg'),
+            expect.anything(),
+        );
     });
 
     test('should stop a recording successfully', () => {
         recorder.start();
         recorder.stop();
 
-        expect(exec).toHaveBeenCalledWith(expect.stringContaining('ffmpeg'), expect.anything());
+        expect(exec).toHaveBeenCalledWith(
+            expect.stringContaining('ffmpeg'),
+            expect.anything(),
+        );
         expect(recorder.isRecording).toBe(false);
     });
 
@@ -53,7 +61,9 @@ describe('VideoRecorder', () => {
 
         recorder.start();
 
-        expect(errorListener).toHaveBeenCalledWith(new RecordingError(409, 'Recording is already in progress.'));
+        expect(errorListener).toHaveBeenCalledWith(
+            new RecordingError(409, 'Recording is already in progress.'),
+        );
     });
 
     test('should throw an error when stopping without an active recording', () => {
@@ -62,7 +72,9 @@ describe('VideoRecorder', () => {
 
         recorder.stop();
 
-        expect(errorListener).toHaveBeenCalledWith(new RecordingError(404, 'No active recording to stop.'));
+        expect(errorListener).toHaveBeenCalledWith(
+            new RecordingError(404, 'No active recording to stop.'),
+        );
     });
 
     test('should log "Recording Finished" on successful stop', () => {
@@ -77,7 +89,9 @@ describe('VideoRecorder', () => {
     test('should validate volume range during initialization', () => {
         expect(() => {
             new VideoRecorder({ volume: 3.0 });
-        }).toThrow(new RecordingError(400, 'Volume must be between 0.0 and 2.0.'));
+        }).toThrow(
+            new RecordingError(400, 'Volume must be between 0.0 and 2.0.'),
+        );
     });
 
     test('should handle verbose output correctly', () => {
@@ -85,7 +99,11 @@ describe('VideoRecorder', () => {
 
         recorder.start();
 
-        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Starting recording:'));
-        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('FFmpeg Command:'));
+        expect(console.log).toHaveBeenCalledWith(
+            expect.stringContaining('Starting recording:'),
+        );
+        expect(console.log).toHaveBeenCalledWith(
+            expect.stringContaining('FFmpeg Command:'),
+        );
     });
 });

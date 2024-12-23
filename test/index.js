@@ -10,7 +10,7 @@ const recorder = new VideoRecorder({
     verbose: true,
     includeUUID: false,
     recordAudio: true,
-    audioSource: "Stereo Mix (Realtek(R) Audio)",
+    audioSource: 'Stereo Mix (Realtek(R) Audio)',
 });
 
 recorder.start();

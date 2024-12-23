@@ -1,35 +1,38 @@
 {
-  "name": "vidclip",
-  "version": "3.1.0",
-  "description": "A highly customizable, lightweight screen recorder.",
-  "main": "src/index.js",
-  "scripts": {
-    "build": "npm ci",
-    "test": "node src/index.js && jest"
-  },
-  "author": "Terry Kim",
-  "license": "MIT",
-  "keywords": [
-    "screen",
-    "recorder",
-    "video",
-    "clip",
-    "record",
-    "screen-recorder",
-    "video-clip",
-    "screen-record",
-    "video-record"
-  ],
-  "dependencies": {
-    "@ffmpeg-installer/ffmpeg": "^1.1.0",
-    "shell-quote": "^1.8.2",
-    "uuid": "^11.0.3"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/realyoterry/vidclip.git"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0"
-  }
+    "name": "vidclip",
+    "version": "3.1.0",
+    "description": "A highly customizable, lightweight screen recorder.",
+    "main": "src/index.js",
+    "scripts": {
+        "build": "npm ci",
+        "test": "node src/index.js && jest && npm run read",
+        "format": "prettier --write .",
+        "read": "prettier --check ."
+    },
+    "author": "Terry Kim",
+    "license": "MIT",
+    "keywords": [
+        "screen",
+        "recorder",
+        "video",
+        "clip",
+        "record",
+        "screen-recorder",
+        "video-clip",
+        "screen-record",
+        "video-record"
+    ],
+    "dependencies": {
+        "@ffmpeg-installer/ffmpeg": "^1.1.0",
+        "shell-quote": "^1.8.2",
+        "uuid": "^11.0.3"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/realyoterry/vidclip.git"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0",
+        "prettier": "3.4.2"
+    }
 }

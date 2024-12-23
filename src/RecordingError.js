@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * Custom error class for handling recording errors.
+ * @class
+ * @extends Error
+ */
 class RecordingError extends Error {
     /**
      * Creates an instance of the RecordingError.

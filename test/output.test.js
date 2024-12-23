@@ -9,7 +9,9 @@ describe('output.js', () => {
     test('ensureOutputDirExists creates the directory if it does not exist', () => {
         fs.existsSync.mockReturnValue(false);
         ensureOutputDirExists('./test');
-        expect(fs.mkdirSync).toHaveBeenCalledWith('./test', { recursive: true });
+        expect(fs.mkdirSync).toHaveBeenCalledWith('./test', {
+            recursive: true,
+        });
     });
 
     test('getFilePath includes UUID when includeUUID is true', () => {
@@ -20,6 +22,8 @@ describe('output.js', () => {
 
     test('getFilePath does not include UUID when includeUUID is false', () => {
         const filePath = getFilePath('./test', 'file', 'mp4', false);
-        expect(filePath === 'test/file.mp4' || filePath === 'test\\file.mp4').toBe(true);
+        expect(
+            filePath === 'test/file.mp4' || filePath === 'test\\file.mp4',
+        ).toBe(true);
     });
 });

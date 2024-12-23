@@ -1,5 +1,6 @@
 /**
  * @module VideoRecorder
+ * @description Module for recording video and audio using FFmpeg.
  */
 
 'use strict';
@@ -9,14 +10,26 @@ const ffmpeg = require('@ffmpeg-installer/ffmpeg').path;
 const shellQuote = require('shell-quote');
 const { exec } = require('child_process');
 const { EventEmitter } = require('events');
-const { getDefaultSource, getDefaultAudioSource, getPlatformInput, getAudioCommand } = require('./codec');
+const {
+    getDefaultSource,
+    getDefaultAudioSource,
+    getPlatformInput,
+} = require('./codec');
 const { ensureOutputDirExists, getFilePath } = require('./output');
-const RecordingError = require('./errors');
+const RecordingError = require('./RecordingError');
 
 /**
  * Lists available audio devices based on the platform.
+ *
  * @returns {Promise<string[]>} A promise that resolves with a list of available audio devices.
  * @throws {Error} If the platform is unsupported.
+ *
+ * @example
+ * listAudioDevices().then(devices => {
+ *   console.log(devices);
+ * }).catch(error => {
+ *   console.error(error);
+ * });
  */
 function listAudioDevices() {
     const platform = os.platform();
@@ -42,7 +55,10 @@ function listAudioDevices() {
             let devices = [];
             let match;
 
-            const regex = /"([^"]+)"/g;
+            let regex =
+                platform === 'linux'
+                    ? /(\d+)\s+(\w+)\s+(\w+)\s+(.+)/g
+                    : /"([^"]+)"/g;
 
             while ((match = regex.exec(output)) !== null) {
                 const deviceName = match[1];
@@ -59,11 +75,17 @@ function listAudioDevices() {
 
 /**
  * VideoRecorder class for recording video with FFmpeg.
+ *
  * @extends EventEmitter
+ * @example
+ * const recorder = new VideoRecorder({ outputPath: './videos', format: 'mp4', recordAudio: true });
+ * recorder.start();
+ * setTimeout(() => recorder.stop(), 5000);
  */
 class VideoRecorder extends EventEmitter {
     /**
      * Creates an instance of VideoRecorder.
+     *
      * @param {Object} options - Configuration options for the video recorder.
      * @param {string} [options.outputPath='./recordings'] - The directory where recordings will be saved.
      * @param {string} [options.fileName='output'] - The base filename for the recorded video.
@@ -73,12 +95,22 @@ class VideoRecorder extends EventEmitter {
      * @param {string} [options.preset='ultrafast'] - The encoding preset for FFmpeg (e.g., 'ultrafast').
      * @param {string} [options.resolution='1920x1080'] - The resolution of the recorded video (e.g., '1920x1080').
      * @param {boolean} [options.verbose=false] - If true, logs FFmpeg output to the console.
-     * @param {boolean} [options.includeUUID=true] - If true, includes a UUID in the filename.
-     * @param {boolean} [options.recordAudio=false] - If true, records audio along with the video.
+     * @param {boolean} [options.includeUUID=false] - If true, includes a UUID in the filename.
+     * @param {boolean} [options.recordAudio=true] - If true, records audio along with the video.
      * @param {string|null} [options.audioSource=null] - The audio source for recording, null uses default.
      * @param {number} [options.volume=1.0] - The audio volume multiplier (between 0.0 and 2.0).
      * @param {Array<string>} [options.extraArgs=[]] - Additional arguments to pass to FFmpeg.
+     *
      * @throws {RecordingError} Throws error if any configuration is invalid.
+     *
+     * @example
+     * const recorder = new VideoRecorder({
+     *   outputPath: './videos',
+     *   fileName: 'myrecording',
+     *   recordAudio: true,
+     *   volume: 1.5
+     * });
+     * recorder.start();
      */
     constructor({
         outputPath = './recordings',
@@ -89,19 +121,62 @@ class VideoRecorder extends EventEmitter {
         preset = 'ultrafast',
         resolution = '1920x1080',
         verbose = false,
-        includeUUID = true,
-        recordAudio = false,
+        includeUUID = false,
+        recordAudio = true,
         audioSource = null,
         volume = 1.0,
         extraArgs = [],
     }) {
         super();
 
+        this._validateOptions({
+            volume,
+            codec,
+            preset,
+            resolution,
+            frameRate,
+            fileName,
+            outputPath,
+        });
+
+        this.outputPath = outputPath;
+        this.fileName = fileName;
+        this.format = format;
+        this.source = getDefaultSource();
+        this.frameRate = frameRate;
+        this.codec = codec;
+        this.preset = preset;
+        this.resolution = resolution;
+        this.isRecording = false;
+        this.process = null;
+        this.verbose = verbose;
+        this.includeUUID = includeUUID;
+        this.recordAudio = recordAudio;
+        this.audioSource = audioSource ?? getDefaultAudioSource();
+        this.volume = volume;
+        this.extraArgs = extraArgs;
+
+        ensureOutputDirExists(this.outputPath);
+    }
+
+    _validateOptions(options) {
+        const {
+            volume,
+            codec,
+            preset,
+            resolution,
+            frameRate,
+            fileName,
+            outputPath,
+        } = options;
         const allowedCodecs = ['libx264', 'libvpx', 'mpeg4'];
         const allowedPresets = ['ultrafast', 'fast', 'medium', 'slow'];
 
         if (volume < 0.0 || volume > 2.0) {
-            throw new RecordingError(400, 'Volume must be between 0.0 and 2.0.');
+            throw new RecordingError(
+                400,
+                'Volume must be between 0.0 and 2.0.',
+            );
         }
 
         if (!allowedCodecs.includes(codec)) {
@@ -127,40 +202,36 @@ class VideoRecorder extends EventEmitter {
         if (outputPath && !/^[\w\-./]+$/.test(outputPath)) {
             throw new RecordingError(400, `Invalid outputPath: ${outputPath}`);
         }
-
-        this.outputPath = outputPath;
-        this.fileName = fileName;
-        this.format = format;
-        this.source = getDefaultSource();
-        this.frameRate = frameRate;
-        this.codec = codec;
-        this.preset = preset;
-        this.resolution = resolution;
-        this.isRecording = false;
-        this.process = null;
-        this.verbose = verbose;
-        this.includeUUID = includeUUID;
-        this.recordAudio = recordAudio;
-        this.audioSource = audioSource ?? getDefaultAudioSource();
-        this.volume = volume;
-        this.extraArgs = extraArgs;
-
-        ensureOutputDirExists(this.outputPath);
     }
 
     /**
      * Builds the FFmpeg command to start the recording.
+     *
      * @param {string} filePath - The path where the recording will be saved.
      * @returns {string} The FFmpeg command to execute.
+     *
+     * @example
+     * const filePath = './recordings/output.mp4';
+     * const command = recorder._getRecordingCommand(filePath);
+     * console.log(command);
      */
-    getRecordingCommand(filePath) {
+    _getRecordingCommand(filePath) {
         const platform = os.platform();
         const videoInput = shellQuote.quote([this.source]);
-        const audioOptions = this.recordAudio ? this.getAudioOptions(platform, this.audioSource).replace(/'/g, '"') : '';
+        const audioOptions = this.recordAudio
+            ? this._getAudioOptions(platform, this.audioSource).replace(
+                  /'/g,
+                  '"',
+              )
+            : '';
         const codecOptions = `-c:v ${shellQuote.quote([this.codec])} -preset ${shellQuote.quote([this.preset])} -pix_fmt yuv420p`;
-        const resolution = this.resolution ? `-s ${shellQuote.quote([this.resolution])}` : '';
+        const resolution = this.resolution
+            ? `-s ${shellQuote.quote([this.resolution])}`
+            : '';
         const frameRate = shellQuote.quote([this.frameRate.toString()]);
-        const extraArgs = this.extraArgs.map(arg => shellQuote.quote([arg])).join(' ');
+        const extraArgs = this.extraArgs
+            .map((arg) => shellQuote.quote([arg]))
+            .join(' ');
         const outputPath = shellQuote.quote([filePath]);
 
         return `${ffmpeg} -y -f ${getPlatformInput(platform)} -framerate ${frameRate} -i ${videoInput} ${audioOptions} ${resolution} ${codecOptions} ${extraArgs} ${outputPath}`;
@@ -168,11 +239,18 @@ class VideoRecorder extends EventEmitter {
 
     /**
      * Returns the audio options for FFmpeg based on the platform and audio input.
+     *
      * @param {string} platform - The operating system platform.
      * @param {string} audioInput - The audio input device.
      * @returns {string} The audio options for FFmpeg.
+     *
+     * @throws {RecordingError} If audio input is invalid or platform is unsupported.
+     *
+     * @example
+     * const audioOptions = recorder._getAudioOptions('linux', 'alsa_input.pci-0000_00_1b.0.analog-stereo');
+     * console.log(audioOptions);
      */
-    getAudioOptions(platform, audioInput) {
+    _getAudioOptions(platform, audioInput) {
         if (!this.recordAudio) return '';
 
         let audioOptions = '';
@@ -188,7 +266,10 @@ class VideoRecorder extends EventEmitter {
                 audioOptions = `-f pulse -i ${shellQuote.quote([audioInput])}`;
                 break;
             default:
-                throw new RecordingError(400, `Unsupported platform for audio: ${platform}`);
+                throw new RecordingError(
+                    400,
+                    `Unsupported platform for audio: ${platform}`,
+                );
         }
 
         if (this.volume !== 1.0) {
@@ -201,20 +282,32 @@ class VideoRecorder extends EventEmitter {
     /**
      * Starts the video recording process.
      * Emits 'error' if the recording cannot start.
+     *
      * @throws {RecordingError} Throws error if recording already in progress or if FFmpeg command fails.
+     *
+     * @example
+     * recorder.start();
      */
     start() {
         if (this.isRecording) {
-            this.emit('error', new RecordingError(409, 'Recording is already in progress.'));
+            this.emit(
+                'error',
+                new RecordingError(409, 'Recording is already in progress.'),
+            );
             return;
         }
 
-        const filePath = getFilePath(this.outputPath, this.fileName, this.format, this.includeUUID);
+        const filePath = getFilePath(
+            this.outputPath,
+            this.fileName,
+            this.format,
+            this.includeUUID,
+        );
 
         let command;
 
         try {
-            command = this.getRecordingCommand(filePath);
+            command = this._getRecordingCommand(filePath);
         } catch (error) {
             this.emit('error', new RecordingError(500, error.message));
             return;
@@ -231,7 +324,10 @@ class VideoRecorder extends EventEmitter {
                     return;
                 }
 
-                this.emit('error', new RecordingError(error.code ?? 500, error.message));
+                this.emit(
+                    'error',
+                    new RecordingError(error.code ?? 500, error.message),
+                );
                 return;
             }
 
@@ -251,17 +347,35 @@ class VideoRecorder extends EventEmitter {
     /**
      * Stops the video recording process.
      * Emits 'error' if no active recording is found.
+     *
      * @throws {RecordingError} Throws error if no active recording to stop.
+     *
+     * @example
+     * recorder.stop();
      */
     stop() {
         if (!this.isRecording) {
-            this.emit('error', new RecordingError(404, 'No active recording to stop.'));
+            this.emit(
+                'error',
+                new RecordingError(404, 'No active recording to stop.'),
+            );
             return;
         }
 
-        if (this.process) {
-            this.process.kill('SIGINT');
-            this.process.stdin.write('q\n');
+        try {
+            if (this.process) {
+                this.process.kill('SIGINT');
+                this.process.stdin.write('q\n');
+            }
+        } catch (err) {
+            this.process.kill('SIGKILL');
+            this.emit(
+                'error',
+                new RecordingError(
+                    500,
+                    `Failed to stop recording: ${err.message}`,
+                ),
+            );
         }
 
         if (this.verbose) {
