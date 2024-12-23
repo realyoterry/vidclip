@@ -2,6 +2,7 @@
 
 const os = require('os');
 const ffmpeg = require('@ffmpeg-installer/ffmpeg').path;
+const shellQuote = require('shell-quote');
 const { exec } = require('child_process');
 const { EventEmitter } = require('events');
 const { getDefaultSource, getDefaultAudioSource, getPlatformInput, getAudioCommand } = require('./codec');
@@ -152,7 +153,7 @@ class VideoRecorder extends EventEmitter {
         }
 
         if (this.volume !== 1.0) {
-            audioOptions += ` -af "volume=${this.volume}"`;
+            audioOptions += ` -af "volume=${shellQuote.quote([this.volume.toString()])}"`;
         }
 
         return audioOptions;

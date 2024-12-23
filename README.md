@@ -85,7 +85,7 @@ setTimeout(() => {
 
 Now when you run it, the mp4 file would be saved in the `testRecordings` folder.
 
-### Customization
+### 3. Customization
 
 **Windows users** - PLEASE make sure you have Stereo Mix enabled. To enable it, go to `Settings > System > Sound > More sound settings > Recording > Stereo Mix`. The stereo mix is for recordig desktop audio.
 
