@@ -23,8 +23,6 @@
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "ffmpeg": "^0.0.4",
-    "node-record-lpcm16": "^1.0.1",
-    "systeminformation": "^5.23.16",
     "uuid": "^11.0.3"
   },
   "devDependencies": {
