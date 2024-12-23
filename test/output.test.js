@@ -20,6 +20,6 @@ describe('output.js', () => {
 
     test('getFilePath does not include UUID when includeUUID is false', () => {
         const filePath = getFilePath('./test', 'file', 'mp4', false);
-        expect(filePath).toBe('test\\file.mp4');
+        expect(filePath === 'test/file.mp4' || filePath === 'test\\file.mp4').toBe(true);
     });
 });
