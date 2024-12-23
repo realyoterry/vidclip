@@ -229,9 +229,7 @@ class VideoRecorder extends EventEmitter {
             ? `-s ${quote([this.resolution])}`
             : '';
         const frameRate = quote([this.frameRate.toString()]);
-        const extraArgs = this.extraArgs
-            .map((arg) => quote([arg]))
-            .join(' ');
+        const extraArgs = this.extraArgs.map((arg) => quote([arg])).join(' ');
         const outputPath = quote([filePath]);
 
         return `${ffmpeg} -y -f ${getPlatformInput(platform)} -framerate ${frameRate} -i ${videoInput} ${audioOptions} ${resolution} ${codecOptions} ${extraArgs} ${outputPath}`;
