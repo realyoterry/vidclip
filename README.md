@@ -1,28 +1,42 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/realyoterry/vidclip/main/public/vidclip.png" width="546"></img>
+    <a href="https://github.com/realyoterry/vidclip"><img src="https://raw.githubusercontent.com/realyoterry/vidclip/main/public/vidclip.png" width="546"></img></a>
 </p>
 
 <p align="center">
-    <img src="https://img.shields.io/npm/v/vidclip"></img>
-    <img src="https://img.shields.io/github/license/realyoterry/vidclip"></img>
-    <img src="https://img.shields.io/npm/d18m/vidclip.svg?maxAge=3600"></img>
-    <img src="https://github.com/realyoterry/vidclip/actions/workflows/nodejs.yml/badge.svg"></img>
+    <a href="https://www.npmjs.com/package/vidclip"><img src="https://img.shields.io/npm/v/vidclip"></img></a>
+    <a href="https://github.com/realyoterry/vidclip/blob/main/LICENSE"><img src="https://img.shields.io/github/license/realyoterry/vidclip"></img></a>
+    <a href="https://npm-stat.com/charts.html?package=vidclip&from=2024-11-01"><img src="https://img.shields.io/npm/d18m/vidclip.svg?maxAge=3600"></img></a>
+    <a href="https://github.com/realyoterry/vidclip/actions/workflows/nodejs.yml"><img src="https://github.com/realyoterry/vidclip/actions/workflows/nodejs.yml/badge.svg"></img></a>
 </p>
 <br />
 <p align="center">A highly customizable, lightweight screen & audio recorder.</p>
 
 ## Features
 
-- Record & capture your whole desktop with/without audio
-- Save recordings in various formats (MP4, MOV, etc.)
+- Record & capture your whole desktop / webcam with/without audio
+- Save recordings in various formats (MP4, MOV, MKV etc.)
 - Adjustable frame rate, resolution, bitrate and much more
 - Audio recording from microphone and/or system sound
 - Lightweight and minimal resource usage
 
-**\*Before you get started:**
+#### *Before you get started:
 
 - Familiarize yourself with the [Node.js basics](https://developer.mozilla.org/en-US/docs/Web/JavaScript).
 - Please be respectful and kind in our community.
+
+## Contents
+
+- [Features](#features)
+    - [Before you get started](#before-you-get-started)
+- [Installation](#installation)
+- [Usage](#usage)
+    - [Import the application](#1-import-the-application)
+    - [Basic Functions](#2-basic-functions)
+    - [Customization](#3-customization)
+- [Other](#other)
+    - [Contributing](#contributing)
+    - [License](#license)
+    - [Contact](#contact)
 
 ## Installation
 
@@ -42,7 +56,7 @@ bun add vidclip
 
 ## Usage
 
-Here's a quick example on how to use the basic features of this package. Full and detailed documentation is on the [Vidclip documentation.](https://vidclip.js.org)
+Here's a quick example on how to use the basic features of this package. Full and detailed documentation is on the [vidclip documentation.](https://vidclip.js.org)
 
 ### 1. Import the application:
 Make sure you have installed the package first.
@@ -118,14 +132,22 @@ listAudioDevices()
 
 Then, set `audioSource` to the desired source you would like to use.
 
-## Contributing
+## Other
+
+Please take a look here before opening an PR / issue!
+
+### Contributing
 
 Contributions are welcome to everyone! Please make a PR at the [GitHub repository](https://github.com/realyoterry/vidclip) after you have made your changes.
 
-## License
+### Security
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+If you discover any security vulnerabilities, we kindly ask that you do not exploit them. Instead, please report the issue to us by opening an issue on GitHub with the label `security (IMPORTANT)`. We take security very seriously and will address the reported vulnerabilities as quickly as possible. Your cooperation and assistance in maintaining the security of this project are greatly appreciated.
 
-## Contact
+### License
 
-For any questions or suggestions, please open an issue or contact me at [theterrykim@gmail.com](mailto:theterrykim@gmail.com).
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/realyoterry/vidclip/blob/main/LICENSE) file for details.
+
+### Contact
+
+For any questions or suggestions, please open an [issue](https://github.com/realyoterry/vidclip/issues) or contact me at [theterrykim@gmail.com](mailto:theterrykim@gmail.com).
