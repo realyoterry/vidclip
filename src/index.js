@@ -87,8 +87,35 @@ class VideoRecorder extends EventEmitter {
     }) {
         super();
 
+        const allowedCodecs = ['libx264', 'libvpx', 'mpeg4'];
+        const allowedPresets = ['ultrafast', 'fast', 'medium', 'slow'];
+
         if (volume < 0.0 || volume > 2.0) {
             throw new RecordingError(400, 'Volume must be between 0.0 and 2.0.');
+        }
+
+        if (!allowedCodecs.includes(codec)) {
+            throw new RecordingError(400, `Invalid codec: ${this.codec}`);
+        }
+
+        if (!allowedPresets.includes(preset)) {
+            throw new RecordingError(400, `Invalid preset: ${this.preset}`);
+        }
+
+        if (resolution && !/^\d{1,5}x\d{1,5}$/.test(resolution)) {
+            throw new RecordingError(400, `Invalid resolution: ${resolution}`);
+        }
+
+        if (!Number.isInteger(frameRate) || frameRate <= 0) {
+            throw new RecordingError(400, `Invalid frameRate: ${frameRate}`);
+        }
+
+        if (fileName && !/^[\w\-.]+$/.test(fileName)) {
+            throw new RecordingError(400, `Invalid fileName: ${fileName}`);
+        }
+
+        if (outputPath && !/^[\w\-./]+$/.test(outputPath)) {
+            throw new RecordingError(400, `Invalid outputPath: ${outputPath}`);
         }
 
         this.outputPath = outputPath;
@@ -117,15 +144,16 @@ class VideoRecorder extends EventEmitter {
      * @returns {string} The FFmpeg command to execute.
      */
     getRecordingCommand(filePath) {
-        const platform = os.platform();
-        const videoInput = this.source;
-        const audioInput = this.audioSource;
-        const resolution = this.resolution ? `-s ${this.resolution}` : '';
-        const audioOptions = this.recordAudio ? this.getAudioOptions(platform, audioInput) : '';
-        const codecOptions = `-c:v ${this.codec} -preset ${this.preset} -pix_fmt yuv420p`;
-        const extraArgs = this.extraArgs.join(' ');
+        const codecOptions = `-c:v ${shellQuote.quote([this.codec])} -preset ${shellQuote.quote([this.preset])} -pix_fmt yuv420p`;
+        const resolution = this.resolution ? `-s ${shellQuote.quote([this.resolution])}` : '';
+        const frameRate = shellQuote.quote([this.frameRate.toString()]);
+        const videoInput = shellQuote.quote([videoInput]);
+        const audioOptions = audioOptions ? audioOptions.split(' ').map(arg => shellQuote.quote([arg])).join(' ') : '';
+        const extraArgs = this.extraArgs.map(arg => shellQuote.quote([arg])).join(' ');
+        const filePath = shellQuote.quote([filePath]);
 
-        return `${ffmpeg} -y -f ${getPlatformInput(platform)} -framerate ${this.frameRate} -i ${videoInput} ${audioOptions} ${resolution} ${codecOptions} ${extraArgs} ${filePath}`;
+
+        return `${ffmpeg} -y -f ${getPlatformInput(platform)} -framerate ${frameRate} -i ${videoInput} ${audioOptions} ${resolution} ${codecOptions} ${extraArgs} ${filePath}`;
     }
 
     /**
@@ -136,18 +164,18 @@ class VideoRecorder extends EventEmitter {
      */
     getAudioOptions(platform, audioInput) {
         let audioOptions = '';
-        
+
         switch (platform) {
-            case 'win32': 
-                audioOptions = `-f dshow -i audio="${audioInput}"`; 
+            case 'win32':
+                audioOptions = `-f dshow -i audio=${shellQuote.quote([audioInput])}`;
                 break;
-            case 'darwin': 
-                audioOptions = `-f avfoundation -i "${audioInput}"`; 
+            case 'darwin':
+                audioOptions = `-f avfoundation -i ${shellQuote.quote([audioInput])}`;
                 break;
-            case 'linux': 
-                audioOptions = `-f pulse -i ${audioInput}`; 
+            case 'linux':
+                audioOptions = `-f pulse -i ${shellQuote.quote([audioInput])}`;
                 break;
-            default: 
+            default:
                 audioOptions = '';
                 break;
         }
