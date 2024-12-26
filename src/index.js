@@ -5,7 +5,7 @@
 
 'use strict';
 
-const os = require('os');
+const platform = require('os').platform();
 const ffmpeg = require('@ffmpeg-installer/ffmpeg').path;
 const shellQuote = require('shell-quote');
 const { exec } = require('child_process');
@@ -22,7 +22,7 @@ const RecordingError = require('./RecordingError');
  * Lists available audio devices based on the platform.
  *
  * @returns {Promise<string[]>} A promise that resolves with a list of available audio devices.
- * @throws {Error} If the platform is unsupported.
+ * @throws {RecordingError} If the platform is unsupported.
  *
  * @example
  * listAudioDevices().then(devices => {
@@ -32,12 +32,11 @@ const RecordingError = require('./RecordingError');
  * });
  */
 function listAudioDevices() {
-    const platform = os.platform();
-    let command = '';
+    let command;
 
     switch (platform) {
         case 'win32':
-            command = `${ffmpeg} -list_devices true -f dshow -i video="dummy"`;
+            command = `${ffmpeg} -list_devices true -f dshow -i dummy`;
             break;
         case 'darwin':
             command = `${ffmpeg} -f avfoundation -list_devices true -i ""`;
@@ -46,26 +45,33 @@ function listAudioDevices() {
             command = `pactl list sources short`;
             break;
         default:
-            return Promise.reject('Unsupported platform.');
+            return Promise.reject(
+                new RecordingError(400, 'Unsupported platform.'),
+            );
     }
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         exec(command, (error, stdout, stderr) => {
-            let output = platform === 'linux' ? stdout : stderr;
-            let devices = [];
-            let match;
+            if (error) {
+                return reject(
+                    new RecordingError(
+                        500,
+                        `Failed to list audio devices: ${error.message}`,
+                    ),
+                );
+            }
 
-            let regex =
+            const output = platform === 'linux' ? stdout : stderr;
+            const regex =
                 platform === 'linux'
                     ? /(\d+)\s+(\w+)\s+(\w+)\s+(.+)/g
                     : /"([^"]+)"/g;
 
-            while ((match = regex.exec(output)) !== null) {
-                const deviceName = match[1];
+            const devices = [];
+            let match;
 
-                if (!deviceName.includes('@device')) {
-                    devices.push(deviceName);
-                }
+            while ((match = regex.exec(output)) !== null) {
+                devices.push(match[1]);
             }
 
             resolve(devices.sort());
@@ -159,48 +165,51 @@ class VideoRecorder extends EventEmitter {
         ensureOutputDirExists(this.outputPath);
     }
 
+    /**
+     * Validates the configuration options passed to the VideoRecorder.
+     * Ensures that all provided options meet the required criteria.
+     *
+     * @param {Object} options - The configuration options to validate.
+     * @param {number} options.volume - The audio volume multiplier (between 0.0 and 2.0).
+     * @param {string} options.codec - The video codec to use for recording (e.g., 'libx264').
+     * @param {string} options.preset - The encoding preset for FFmpeg (e.g., 'ultrafast').
+     * @param {string} options.resolution - The resolution of the recorded video (e.g., '1920x1080').
+     * @param {number} options.frameRate - The frame rate for the recording (e.g., 30).
+     * @param {string} options.fileName - The base filename for the recorded video.
+     * @param {string} options.outputPath - The directory where recordings will be saved.
+     *
+     * @throws {RecordingError} Throws a RecordingError if any of the options are invalid.
+     *
+     * @example
+     * const options = {
+     *   volume: 1.5,
+     *   codec: 'libx264',
+     *   preset: 'ultrafast',
+     *   resolution: '1920x1080',
+     *   frameRate: 30,
+     *   fileName: 'myrecording',
+     *   outputPath: './videos'
+     * };
+     * recorder._validateOptions(options);
+     */
     _validateOptions(options) {
-        const {
-            volume,
-            codec,
-            preset,
-            resolution,
-            frameRate,
-            fileName,
-            outputPath,
-        } = options;
-        const allowedCodecs = ['libx264', 'libvpx', 'mpeg4'];
-        const allowedPresets = ['ultrafast', 'fast', 'medium', 'slow'];
+        const validators = {
+            volume: (v) => v >= 0.0 && v <= 2.0,
+            codec: (c) => ['libx264', 'libvpx', 'mpeg4'].includes(c),
+            preset: (p) => ['ultrafast', 'fast', 'medium', 'slow'].includes(p),
+            resolution: (r) => /^\d{1,5}x\d{1,5}$/.test(r),
+            frameRate: (f) => Number.isInteger(f) && f > 0,
+            fileName: (f) => /^[\w\-.]+$/.test(f),
+            outputPath: (p) => /^[\w\-./]+$/.test(p),
+        };
 
-        if (volume < 0.0 || volume > 2.0) {
-            throw new RecordingError(
-                400,
-                'Volume must be between 0.0 and 2.0.',
-            );
-        }
-
-        if (!allowedCodecs.includes(codec)) {
-            throw new RecordingError(400, `Invalid codec: ${codec}`);
-        }
-
-        if (!allowedPresets.includes(preset)) {
-            throw new RecordingError(400, `Invalid preset: ${preset}`);
-        }
-
-        if (resolution && !/^\d{1,5}x\d{1,5}$/.test(resolution)) {
-            throw new RecordingError(400, `Invalid resolution: ${resolution}`);
-        }
-
-        if (!Number.isInteger(frameRate) || frameRate <= 0) {
-            throw new RecordingError(400, `Invalid frameRate: ${frameRate}`);
-        }
-
-        if (fileName && !/^[\w\-.]+$/.test(fileName)) {
-            throw new RecordingError(400, `Invalid fileName: ${fileName}`);
-        }
-
-        if (outputPath && !/^[\w\-./]+$/.test(outputPath)) {
-            throw new RecordingError(400, `Invalid outputPath: ${outputPath}`);
+        for (const [key, validator] of Object.entries(validators)) {
+            if (!validator(options[key])) {
+                throw new RecordingError(
+                    400,
+                    `Invalid value for ${key}: ${options[key]}`,
+                );
+            }
         }
     }
 
@@ -216,25 +225,21 @@ class VideoRecorder extends EventEmitter {
      * console.log(command);
      */
     _getRecordingCommand(filePath) {
-        const platform = os.platform();
+        console.log(platform, this.audioSource);
         const videoInput = shellQuote.quote([this.source]);
         const audioOptions = this.recordAudio
-            ? this._getAudioOptions(platform, this.audioSource).replace(
-                  /'/g,
+            ? this._getAudioOptions(platform, this.audioSource).replaceAll(
+                  "'",
                   '"',
               )
             : '';
-        const codecOptions = `-c:v ${shellQuote.quote([this.codec])} -preset ${shellQuote.quote([this.preset])} -pix_fmt yuv420p`;
-        const resolution = this.resolution
-            ? `-s ${shellQuote.quote([this.resolution])}`
-            : '';
-        const frameRate = shellQuote.quote([this.frameRate.toString()]);
-        const extraArgs = this.extraArgs
-            .map((arg) => shellQuote.quote([arg]))
-            .join(' ');
+        const codecOptions = `-c:v ${this.codec} -preset ${this.preset} -pix_fmt yuv420p`;
+        const resolution = this.resolution ? `-s ${this.resolution}` : '';
+        const frameRate = `-framerate ${this.frameRate}`;
+        const extraArgs = this.extraArgs.join(' ');
         const outputPath = shellQuote.quote([filePath]);
 
-        return `${ffmpeg} -y -f ${getPlatformInput(platform)} -framerate ${frameRate} -i ${videoInput} ${audioOptions} ${resolution} ${codecOptions} ${extraArgs} ${outputPath}`;
+        return `${ffmpeg} -y -f ${getPlatformInput()} ${frameRate} -i ${videoInput} ${audioOptions} ${resolution} ${codecOptions} ${extraArgs} ${outputPath}`;
     }
 
     /**

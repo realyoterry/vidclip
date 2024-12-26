@@ -7,14 +7,18 @@
  */
 class RecordingError extends Error {
     /**
-     * Creates an instance of the RecordingError.
-     * @param {string|number} code - The error code to identify the specific error.
-     * @param {string} message - The error message that describes the error.
+     * Creates an instance of RecordingError.
+     *
+     * @param {number} code - The error code (e.g., 400, 404).
+     * @param {string} message - The error message.
      */
     constructor(code, message) {
-        super(message);
+        super(`[${code}] ${message}`);
+
         this.name = 'RecordingError';
         this.code = code;
+        this.timestamp = new Date();
+
         Error.captureStackTrace(this, RecordingError);
     }
 }

@@ -89,9 +89,7 @@ describe('VideoRecorder', () => {
     test('should validate volume range during initialization', () => {
         expect(() => {
             new VideoRecorder({ volume: 3.0 });
-        }).toThrow(
-            new RecordingError(400, 'Volume must be between 0.0 and 2.0.'),
-        );
+        }).toThrow(new RecordingError(400, 'Invalid value for volume: 3'));
     });
 
     test('should handle verbose output correctly', () => {

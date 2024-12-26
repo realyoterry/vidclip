@@ -1,81 +1,53 @@
 'use strict';
 
+const RecordingError = require('./RecordingError');
 const os = require('os');
-const RecordingError = require('./RecordingError'); // Importing the RecordingError class
 
 /**
- * Gets the default screen source based on the operating system.
- * @returns {string} The default screen source string for FFmpeg.
- * @throws {RecordingError} If the platform is unsupported.
+ * Retrieves the default platform-specific value for a given key.
+ *
+ * @param {string} key - The key to retrieve the default value for (e.g., 'source', 'audio', 'input').
+ * @returns {string} The platform-specific default value.
+ * @throws {RecordingError} Throws an error if the platform is unsupported.
+ *
  * @example
- * const source = getDefaultSource();
+ * const source = getPlatformDefault('source');
  * console.log(source);
  */
-function getDefaultSource() {
+function getPlatformDefault(key) {
     const platform = os.platform();
-    switch (platform) {
-        case 'win32':
-            return 'desktop'; // Windows default screen
-        case 'darwin':
-            return '0:'; // macOS default screen
-        case 'linux':
-            return ':0.0'; // Linux default screen
-        default:
-            throw new RecordingError(
-                400,
-                'Unsupported platform for recording.',
-            ); // Throw RecordingError
+
+    if (!platformDefaults[platform]) {
+        throw new RecordingError(400, `Unsupported platform: ${platform}`);
     }
+    return platformDefaults[platform][key];
 }
 
 /**
- * Gets the default audio source based on the operating system.
- * @returns {string} The default audio source string for FFmpeg or null if not applicable.
- * @throws {RecordingError} If the platform is unsupported.
- * @example
- * const audioSource = getDefaultAudioSource();
- * console.log(audioSource);
+ * Returns the default video source based on the platform.
+ *
+ * @returns {string} The default video source.
+ */
+function getDefaultSource() {
+    return getPlatformDefault('source');
+}
+
+/**
+ * Returns the default audio source based on the platform.
+ *
+ * @returns {string} The default audio source.
  */
 function getDefaultAudioSource() {
-    const platform = os.platform();
-    switch (platform) {
-        case 'win32':
-            return 'Stereo Mix (Realtek(R) Audio)'; // Windows default audio input
-        case 'darwin':
-            return '1'; // macOS default audio input
-        case 'linux':
-            return 'pulse'; // PulseAudio on Linux
-        default:
-            throw new RecordingError(
-                400,
-                'Unsupported platform for capturing audio.',
-            );
-    }
+    return getPlatformDefault('audio');
 }
 
 /**
- * Gets the platform-specific FFmpeg input type.
- * @param {string} platform - The operating system platform.
- * @returns {string} The FFmpeg input type string based on the platform.
- * @throws {RecordingError} If the platform is unsupported.
- * @example
- * const platformInput = getPlatformInput('win32');
- * console.log(platformInput);
+ * Returns the platform-specific input format for FFmpeg.
+ *
+ * @returns {string} The platform-specific input format.
  */
-function getPlatformInput(platform) {
-    switch (platform) {
-        case 'win32':
-            return 'gdigrab'; // Windows screen capture input
-        case 'darwin':
-            return 'avfoundation'; // macOS screen capture input
-        case 'linux':
-            return 'x11grab'; // Linux screen capture input
-        default:
-            throw new RecordingError(
-                400,
-                'Unsupported platform for recording.',
-            );
-    }
+function getPlatformInput() {
+    return getPlatformDefault('input');
 }
 
 module.exports = {
