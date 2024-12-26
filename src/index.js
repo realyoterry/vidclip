@@ -7,7 +7,7 @@
 
 const platform = require('os').platform();
 const ffmpeg = require('@ffmpeg-installer/ffmpeg').path;
-const shellQuote = require('shell-quote');
+const { quote } = require('shell-quote');
 const { exec } = require('child_process');
 const { EventEmitter } = require('events');
 const {
@@ -225,21 +225,24 @@ class VideoRecorder extends EventEmitter {
      * console.log(command);
      */
     _getRecordingCommand(filePath) {
-        console.log(platform, this.audioSource);
-        const videoInput = shellQuote.quote([this.source]);
+        const videoInput = quote([this.source]);
         const audioOptions = this.recordAudio
-            ? this._getAudioOptions(platform, this.audioSource).replaceAll(
-                  "'",
+            ? this._getAudioOptions(platform, this.audioSource).replace(
+                  /'/g,
                   '"',
               )
             : '';
-        const codecOptions = `-c:v ${this.codec} -preset ${this.preset} -pix_fmt yuv420p`;
-        const resolution = this.resolution ? `-s ${this.resolution}` : '';
-        const frameRate = `-framerate ${this.frameRate}`;
-        const extraArgs = this.extraArgs.join(' ');
-        const outputPath = shellQuote.quote([filePath]);
+        const codecOptions = `-c:v ${quote([this.codec])} -preset ${quote([this.preset])} -pix_fmt yuv420p`;
+        const resolution = this.resolution
+            ? `-s ${quote([this.resolution])}`
+            : '';
+        const frameRate = quote([this.frameRate.toString()]);
+        const extraArgs = this.extraArgs
+            .map((arg) => quote([arg]))
+            .join(' ');
+        const outputPath = quote([filePath]);
 
-        return `${ffmpeg} -y -f ${getPlatformInput()} ${frameRate} -i ${videoInput} ${audioOptions} ${resolution} ${codecOptions} ${extraArgs} ${outputPath}`;
+        return `${ffmpeg} -y -f ${getPlatformInput(platform)} -framerate ${frameRate} -i ${videoInput} ${audioOptions} ${resolution} ${codecOptions} ${extraArgs} ${outputPath}`;
     }
 
     /**
@@ -262,13 +265,13 @@ class VideoRecorder extends EventEmitter {
 
         switch (platform) {
             case 'win32':
-                audioOptions = `-f dshow -i audio=${shellQuote.quote([audioInput])}`;
+                audioOptions = `-f dshow -i audio=${quote([audioInput])}`;
                 break;
             case 'darwin':
-                audioOptions = `-f avfoundation -i ${shellQuote.quote([audioInput])}`;
+                audioOptions = `-f avfoundation -i ${quote([audioInput])}`;
                 break;
             case 'linux':
-                audioOptions = `-f pulse -i ${shellQuote.quote([audioInput])}`;
+                audioOptions = `-f pulse -i ${quote([audioInput])}`;
                 break;
             default:
                 throw new RecordingError(
@@ -278,7 +281,7 @@ class VideoRecorder extends EventEmitter {
         }
 
         if (this.volume !== 1.0) {
-            audioOptions += ` -af "volume=${shellQuote.quote([this.volume.toString()])}"`;
+            audioOptions += ` -af "volume=${quote([this.volume.toString()])}"`;
         }
 
         return audioOptions;
