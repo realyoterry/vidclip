@@ -3,6 +3,16 @@
 const RecordingError = require('./RecordingError');
 const os = require('os');
 
+const platformDefaults = {
+    win32: {
+        source: 'desktop',
+        audio: 'Stereo Mix (Realtek(R) Audio)',
+        input: 'gdigrab',
+    },
+    darwin: { source: '0:', audio: '1', input: 'avfoundation' },
+    linux: { source: ':0.0', audio: 'pulse', input: 'x11grab' },
+};
+
 /**
  * Retrieves the default platform-specific value for a given key.
  *
