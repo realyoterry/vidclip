@@ -1,6 +1,6 @@
 {
     "name": "vidclip",
-    "version": "3.1.0",
+    "version": "3.2.0",
     "description": "A highly customizable, lightweight screen recorder.",
     "main": "src/index.js",
     "scripts": {
