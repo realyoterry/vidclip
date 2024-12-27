@@ -97,7 +97,7 @@ setTimeout(() => {
 }, 10000);
 ```
 
-##### *Note: This is just an example, showcasing the different customizable settings. Please see the [Vidclip documentation](https://vidclip.js.org) to explore in more detail.
+##### \*Note: This is just an example, showcasing the different customizable settings. Please see the [Vidclip documentation](https://vidclip.js.org) to explore in more detail.
 
 ---
 
