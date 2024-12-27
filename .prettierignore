@@ -1,1 +1,10 @@
 node_modules
+README.mdd
+SECURITY.md
+.prettierrc
+LICENSE
+.npmignore
+.gitignore
+public/
+COMMIT_CONVENTION.md
+CONTRIBUTING.md
