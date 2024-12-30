@@ -53,7 +53,7 @@ bun add vidclip
 
 ## Usage
 
-Here's a quick example on how to use the basic features of this package. Full and detailed documentation is on the [vidclip documentation.](https://vidclip.js.org)
+Here's a quick example on how to use the basic features of this package. Full and detailed documentation is on the [Vidclip documentation.](https://vidclip.js.org)
 
 ---
 
