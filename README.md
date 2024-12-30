@@ -117,11 +117,11 @@ Please take a look here before opening an pull request / issue!
 
 ### Contributing
 
-Contributions are welcome to everyone! Please make a pull request at the [GitHub repository](https://github.com/realyoterry/vidclip) after you have made your changes.
+Contributions are welcome to everyone! Please make sure you have read the [CONTRIBUTING.md](https://github.com/realyoterry/vidclip/bloc/main/CONTRIBUTING.md) file, and the [COMMIT_CONVENTION.md](https://github.com/realyoterry/vidclip/blob/main/COMMIT_CONVENTION.md) file before you get started. When you are done, make a pull request at the [GitHub repository](https://github.com/realyoterry/vidclip).
 
 ### Security
 
-If you discover any security vulnerabilities, we kindly ask you to read the [SECURITY.md](https://github.com/realyoterry/vidclip/blob/main/SECURITY.md) file to create an issue. We take security **very seriously**, and will address the reported vulnerabilities as quickly as possible. Your cooperation and assistance in maintaining the security of this project are greatly appreciated.
+If you discover any security vulnerabilities, we kindly ask you to read the [SECURITY.md](https://github.com/realyoterry/vidclip/blob/main/SECURITY.md), then create an issue. We take security **very seriously**, and will address the reported vulnerabilities as quickly as possible. Your cooperation and assistance in maintaining the security of this project are greatly appreciated.
 
 ### License
 
