@@ -9,11 +9,9 @@ currently being supported with security updates.
 
 | Version | Supported |
 | ------- | --------- |
-| 3.0.x   | ✔️        |
-| 2.0.0   | ❌❌      |
-| 1.0.0   | ❌        |
-
-❌❌ = HIGHLY UNSUPPORTED
+| 3.0.x   | ✔️       |
+| 2.0.0   | ❌       |
+| 1.0.0   | ❌       |
 
 ## Reporting a Vulnerability
 

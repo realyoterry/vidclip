@@ -1,0 +1,16 @@
+name: Greetings
+
+on: [pull_request_target, issues]
+
+jobs:
+    greeting:
+        runs-on: ubuntu-latest
+        permissions:
+            issues: write
+            pull-requests: write
+        steps:
+            - uses: actions/first-interaction@v1
+              with:
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+                  issue-message: 'Greetings! Thanks for opening an issue. I will do my best to assist you. If you have something to suggest, please open a pull request. If not, please explain in detail your issue, and provide a screenshot if possible. Thank you!'
+                  pr-message: 'Greetings! Thanks for opening a pull request. Your suggestions are the key to this code. If you have an error / problem, please open an issue. If not, please explain in detail what you have changed, and how it is a reasonable change. Thank you!'
