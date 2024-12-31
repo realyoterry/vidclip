@@ -7,6 +7,7 @@
     <a href="https://github.com/realyoterry/vidclip/blob/main/LICENSE"><img src="https://img.shields.io/github/license/realyoterry/vidclip"></img></a>
     <a href="https://npm-stat.com/charts.html?package=vidclip&from=2024-11-01"><img src="https://img.shields.io/npm/d18m/vidclip.svg?maxAge=3600"></img></a>
     <a href="https://github.com/realyoterry/vidclip/actions/workflows/nodejs.yml"><img src="https://github.com/realyoterry/vidclip/actions/workflows/nodejs.yml/badge.svg"></img></a>
+    <a href="https://codecov.io/gh/realyoterry/vidclip"><img src="https://codecov.io/gh/realyoterry/vidclip/branch/beta/graph/badge.svg"/></a>
 </p>
 
 ---
