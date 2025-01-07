@@ -21,20 +21,17 @@ const RecordingError = require('./RecordingError');
 /**
  * Lists available audio devices based on the platform.
  *
- * @returns {Promise<string[]>} A promise that resolves with a list of available audio devices.
+ * @param {string} [customPlatform] - The platform to use for listing devices (e.g., 'win32', 'darwin', 'linux').
+ * @returns {Promise<string>} A promise that resolves with a string that lists available audio devices.
  * @throws {RecordingError} If the platform is unsupported.
  *
  * @example
- * listDevices().then(devices => {
- *   console.log(devices);
- * }).catch(error => {
- *   console.error(error);
- * });
+ * listDevices().then(console.log).catch(console.error);
  */
-async function listDevices() {
+async function listDevices(customPlatform = platform) {
     let command;
 
-    switch (platform) {
+    switch (customPlatform) {
         case 'win32':
             command = `${ffmpeg} -list_devices true -f dshow -i dummy`;
             break;
@@ -45,12 +42,10 @@ async function listDevices() {
             command = `pactl list sources short`;
             break;
         default:
-            return Promise.reject(
-                new RecordingError(400, 'Unsupported platform.'),
-            );
+            throw new RecordingError(400, 'Unsupported platform.');
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         exec(command, (error, stdout, stderr) => {
             resolve(stdout || stderr || error);
         });
@@ -307,17 +302,20 @@ class VideoRecorder extends EventEmitter {
 
         this.process = exec(command, (error, stdout, stderr) => {
             if (error) {
-                if (error.signal.includes('SIG')) {
+                if (error.signal?.includes('SIG')) {
                     return;
                 }
 
                 return this.emit(
                     'error',
-                    new RecordingError(error.code ?? 500, error.message),
+                    new RecordingError(
+                        error.code ?? 500,
+                        error.message ?? 'Unknown Error.',
+                    ),
                 );
             }
 
-            if (stderr) {
+            if (stderr && stderr.includes('error')) {
                 return this.emit('error', new RecordingError(500, stderr));
             }
 

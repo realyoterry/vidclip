@@ -15,6 +15,7 @@ const recorder = new VideoRecorder({
 
 listDevices().then((devices) => {
     console.log(devices);
+    console.log(typeof devices);
 });
 
 recorder.start();
