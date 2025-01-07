@@ -27,3 +27,19 @@ describe('output.js', () => {
         ).toBe(true);
     });
 });
+
+test('getFilePath throws an error when fileName or format is missing', () => {
+    const RecordingError = require('../src/RecordingError'); // Ensure RecordingError is imported
+
+    expect(() => {
+        getFilePath('./test', null, 'mp4', true);
+    }).toThrowError(
+        new RecordingError(400, 'fileName and format are required'),
+    );
+
+    expect(() => {
+        getFilePath('./test', 'file', null, true);
+    }).toThrowError(
+        new RecordingError(400, 'fileName and format are required'),
+    );
+});
