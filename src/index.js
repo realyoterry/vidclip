@@ -21,7 +21,6 @@ const RecordingError = require('./RecordingError');
 /**
  * Lists available audio devices based on the platform.
  *
- * @param {string} [platformInput] - The platform to list audio devices for (e.g., 'win32', 'darwin', 'linux').
  * @returns {Promise<string[]>} A promise that resolves with a list of available audio devices.
  * @throws {RecordingError} If the platform is unsupported.
  *
@@ -32,10 +31,10 @@ const RecordingError = require('./RecordingError');
  *   console.error(error);
  * });
  */
-async function listDevices(platformInput) {
+async function listDevices() {
     let command;
 
-    switch (platformInput || platform) {
+    switch (platform) {
         case 'win32':
             command = `${ffmpeg} -list_devices true -f dshow -i dummy`;
             break;
@@ -51,7 +50,7 @@ async function listDevices(platformInput) {
             );
     }
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         exec(command, (error, stdout, stderr) => {
             resolve(stdout || stderr || error);
         });
@@ -308,20 +307,18 @@ class VideoRecorder extends EventEmitter {
 
         this.process = exec(command, (error, stdout, stderr) => {
             if (error) {
-                if (error.signal && error.signal.includes('SIG')) {
+                if (error.signal.includes('SIG')) {
                     return;
                 }
 
-                this.emit(
+                return this.emit(
                     'error',
-                    new RecordingError(500, error.message || 'Unknown error'),
+                    new RecordingError(error.code ?? 500, error.message),
                 );
-                return;
             }
 
-            if (stderr && stderr.includes('error')) {
-                this.emit('error', new RecordingError(500, stderr.trim()));
-                return;
+            if (stderr) {
+                return this.emit('error', new RecordingError(500, stderr));
             }
 
             if (stdout && this.verbose) {

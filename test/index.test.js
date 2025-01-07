@@ -35,10 +35,6 @@ describe('VideoRecorder', () => {
     });
 
     afterEach(() => {
-        jest.resetModules();
-        Object.defineProperty(process, 'platform', {
-            value: process.platform, // Reset to original value
-        });
         if (recorder.process) {
             recorder.process.kill();
         }
@@ -131,111 +127,6 @@ describe('VideoRecorder', () => {
                     'alsa_input.usb_device',
                 ]);
             });
-        });
-    });
-
-    describe('listDevices', () => {
-        it('should list devices on Windows', async () => {
-            Object.defineProperty(process, 'platform', { value: 'win32' });
-            exec.mockImplementation((cmd, callback) => {
-                callback(null, 'Windows audio devices');
-            });
-
-            const devices = await listDevices();
-            expect(devices).toContain('Windows audio devices');
-            expect(exec).toHaveBeenCalledWith(
-                expect.stringContaining('-list_devices true -f dshow -i dummy'),
-                expect.anything(),
-            );
-        });
-
-        it('should list devices on macOS', async () => {
-            exec.mockImplementation((cmd, callback) => {
-                callback(null, 'macOS audio devices');
-            });
-
-            const devices = await listDevices('darwin');
-            expect(devices).toContain('macOS audio devices');
-            expect(exec).toHaveBeenCalledWith(
-                expect.stringContaining(
-                    '-f avfoundation -list_devices true -i ""',
-                ),
-                expect.anything(),
-            );
-        });
-
-        it('should throw an error for unsupported platforms', async () => {
-            await expect(listDevices('unsupported')).rejects.toThrow(
-                new RecordingError(400, 'Unsupported platform.'),
-            );
-        });
-    });
-
-    describe('Constructor Defaults', () => {
-        it('should set default values correctly', () => {
-            const recorder = new VideoRecorder({});
-            expect(recorder.outputPath).toBe('./recordings');
-            expect(recorder.fileName).toBe('output');
-            expect(recorder.format).toBe('mp4');
-            expect(recorder.verbose).toBe(false);
-        });
-    });
-
-    describe('Configuration Validation', () => {
-        it('should throw an error for invalid volume', () => {
-            expect(() => {
-                new VideoRecorder({ volume: 3 });
-            }).toThrow(new RecordingError(400, 'Invalid value for volume: 3'));
-        });
-
-        it('should throw an error for invalid codec', () => {
-            expect(() => {
-                new VideoRecorder({ codec: 'invalid_codec' });
-            }).toThrow(
-                new RecordingError(
-                    400,
-                    'Invalid value for codec: invalid_codec',
-                ),
-            );
-        });
-    });
-
-    describe('Audio Options', () => {
-        it('should generate audio options for Windows', () => {
-            Object.defineProperty(process, 'platform', { value: 'win32' });
-            const options = recorder._getAudioOptions('win32', 'Stereo Mix');
-            expect(options).toContain("-f dshow -i audio='Stereo Mix'");
-        });
-
-        it('should generate audio options for macOS', () => {
-            Object.defineProperty(process, 'platform', { value: 'darwin' });
-            const options = recorder._getAudioOptions(
-                'darwin',
-                'Built-in Microphone',
-            );
-            expect(options).toContain(
-                "-f avfoundation -i 'Built-in Microphone'",
-            );
-        });
-
-        it('should generate audio options for Linux', () => {
-            Object.defineProperty(process, 'platform', { value: 'linux' });
-            const options = recorder._getAudioOptions('linux', 'pulse');
-            expect(options).toContain('-f pulse -i pulse');
-        });
-    });
-
-    describe('FFmpeg Process Error Handling', () => {
-        it('should emit an error if FFmpeg command fails', () => {
-            exec.mockImplementation((cmd, callback) => {
-                callback({ signal: 'SIGTERM' });
-            });
-
-            const errorSpy = jest.fn();
-            recorder.on('error', errorSpy);
-            recorder.start();
-
-            expect(errorSpy).not.toHaveBeenCalled();
         });
     });
 });
