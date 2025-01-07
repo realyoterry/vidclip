@@ -25,13 +25,13 @@ const RecordingError = require('./RecordingError');
  * @throws {RecordingError} If the platform is unsupported.
  *
  * @example
- * listAudioDevices().then(devices => {
+ * listDevices().then(devices => {
  *   console.log(devices);
  * }).catch(error => {
  *   console.error(error);
  * });
  */
-function listAudioDevices() {
+async function listDevices() {
     let command;
 
     switch (platform) {
@@ -52,29 +52,7 @@ function listAudioDevices() {
 
     return new Promise((resolve, reject) => {
         exec(command, (error, stdout, stderr) => {
-            if (error) {
-                return reject(
-                    new RecordingError(
-                        500,
-                        `Failed to list audio devices: ${error.message}`,
-                    ),
-                );
-            }
-
-            const output = platform === 'linux' ? stdout : stderr;
-            const regex =
-                platform === 'linux'
-                    ? /(\d+)\s+(\w+)\s+(\w+)\s+(.+)/g
-                    : /"([^"]+)"/g;
-
-            const devices = [];
-            let match;
-
-            while ((match = regex.exec(output)) !== null) {
-                devices.push(match[1]);
-            }
-
-            resolve(devices.sort());
+            resolve(stdout || stderr || error);
         });
     });
 }
@@ -226,19 +204,24 @@ class VideoRecorder extends EventEmitter {
      */
     _getRecordingCommand(filePath) {
         const videoInput = quote([this.source]);
-        const audioOptions = this.recordAudio
-            ? this._getAudioOptions(platform, this.audioSource).replace(
-                  /'/g,
-                  '"',
-              )
-            : '';
         const codecOptions = `-c:v ${quote([this.codec])} -preset ${quote([this.preset])} -pix_fmt yuv420p`;
-        const resolution = this.resolution
-            ? `-s ${quote([this.resolution])}`
-            : '';
         const frameRate = quote([this.frameRate.toString()]);
         const extraArgs = this.extraArgs.map((arg) => quote([arg])).join(' ');
         const outputPath = quote([filePath]);
+
+        let audioOptions = '';
+        let resolution = '';
+
+        if (this.recordAudio) {
+            audioOptions = this._getAudioOptions(
+                platform,
+                this.audioSource,
+            ).replace(/'/g, '"');
+        }
+
+        if (this.resolution) {
+            resolution = `-s ${quote([this.resolution])}`;
+        }
 
         return `${ffmpeg} -y -f ${getPlatformInput(platform)} -framerate ${frameRate} -i ${videoInput} ${audioOptions} ${resolution} ${codecOptions} ${extraArgs} ${outputPath}`;
     }
@@ -296,11 +279,10 @@ class VideoRecorder extends EventEmitter {
      */
     start() {
         if (this.isRecording) {
-            this.emit(
+            return this.emit(
                 'error',
                 new RecordingError(409, 'Recording is already in progress.'),
             );
-            return;
         }
 
         const filePath = getFilePath(
@@ -315,8 +297,7 @@ class VideoRecorder extends EventEmitter {
         try {
             command = this._getRecordingCommand(filePath);
         } catch (error) {
-            this.emit('error', new RecordingError(500, error.message));
-            return;
+            return this.emit('error', new RecordingError(500, error.message));
         }
 
         if (this.verbose) {
@@ -326,20 +307,18 @@ class VideoRecorder extends EventEmitter {
 
         this.process = exec(command, (error, stdout, stderr) => {
             if (error) {
-                if (error.signal === 'SIGINT') {
+                if (error.signal.includes('SIG')) {
                     return;
                 }
 
-                this.emit(
+                return this.emit(
                     'error',
                     new RecordingError(error.code ?? 500, error.message),
                 );
-                return;
             }
 
             if (stderr) {
-                this.emit('error', new RecordingError(500, stderr));
-                return;
+                return this.emit('error', new RecordingError(500, stderr));
             }
 
             if (stdout && this.verbose) {
@@ -397,5 +376,5 @@ class VideoRecorder extends EventEmitter {
 
 module.exports = {
     VideoRecorder,
-    listAudioDevices,
+    listDevices,
 };

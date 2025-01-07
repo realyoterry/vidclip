@@ -105,9 +105,7 @@ setTimeout(() => {
 You can also list the exact name of the **enabled** audio sources to capture audio.
 
 ```js
-listAudioDevices()
-    .then(console.log)
-    .catch(console.error);
+listDevices().then(console.log);
 ```
 
 Then, set the `audioSource` option to the desired device you would like to use.

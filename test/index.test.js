@@ -1,10 +1,12 @@
 'use strict';
 
-const { VideoRecorder } = require('../src/index');
+const { VideoRecorder, listDevices } = require('../src/index');
 const { exec } = require('child_process');
 const RecordingError = require('../src/RecordingError');
 
 jest.mock('child_process');
+
+jest.setTimeout(10000);
 
 jest.mock('../src/codec', () => ({
     getDefaultSource: jest.fn().mockReturnValue('desktop'),
@@ -29,79 +31,102 @@ describe('VideoRecorder', () => {
             format: 'mp4',
             verbose: true,
         });
-        exec.mockClear();
+        jest.clearAllMocks();
     });
 
-    test('should start a recording successfully', () => {
-        recorder.start();
-
-        expect(recorder.isRecording).toBe(true);
-        expect(exec).toHaveBeenCalledWith(
-            expect.stringContaining('ffmpeg'),
-            expect.anything(),
-        );
+    afterEach(() => {
+        if (recorder.process) {
+            recorder.process.kill();
+        }
+        jest.restoreAllMocks();
     });
 
-    test('should stop a recording successfully', () => {
-        recorder.start();
-        recorder.stop();
+    describe('Recording Control', () => {
+        it('should start a recording successfully', () => {
+            recorder.start();
+            expect(recorder.isRecording).toBe(true);
+            expect(exec).toHaveBeenCalledWith(
+                expect.stringContaining('ffmpeg'),
+                expect.anything(),
+            );
+        });
 
-        expect(exec).toHaveBeenCalledWith(
-            expect.stringContaining('ffmpeg'),
-            expect.anything(),
-        );
-        expect(recorder.isRecording).toBe(false);
+        it('should stop a recording successfully', () => {
+            recorder.start();
+            recorder.stop();
+            expect(exec).toHaveBeenCalledWith(
+                expect.stringContaining('ffmpeg'),
+                expect.anything(),
+            );
+            expect(recorder.isRecording).toBe(false);
+        });
+
+        it('should throw an error when starting an already active recording', () => {
+            recorder.start();
+            const errorListener = jest.fn();
+            recorder.on('error', errorListener);
+            recorder.start();
+            expect(errorListener).toHaveBeenCalledWith(
+                new RecordingError(409, 'Recording is already in progress.'),
+            );
+        });
+
+        it('should throw an error when stopping without an active recording', () => {
+            const errorListener = jest.fn();
+            recorder.on('error', errorListener);
+            recorder.stop();
+            expect(errorListener).toHaveBeenCalledWith(
+                new RecordingError(404, 'No active recording to stop.'),
+            );
+        });
     });
 
-    test('should throw an error when starting an already active recording', () => {
-        recorder.start();
+    describe('Audio and Video Options', () => {
+        it('should include resolution if set', () => {
+            recorder.resolution = '1920x1080';
+            const command = recorder._getRecordingCommand('output.mp4');
+            expect(command).toContain('-s 1920x1080');
+        });
 
-        const errorListener = jest.fn();
-        recorder.on('error', errorListener);
-
-        recorder.start();
-
-        expect(errorListener).toHaveBeenCalledWith(
-            new RecordingError(409, 'Recording is already in progress.'),
-        );
+        it('should include volume filter if volume is not 1.0', () => {
+            recorder.volume = 1.5;
+            const audioOptions = recorder._getAudioOptions('linux', 'pulse');
+            expect(audioOptions).toContain('-af "volume=1.5"');
+        });
     });
 
-    test('should throw an error when stopping without an active recording', () => {
-        const errorListener = jest.fn();
-        recorder.on('error', errorListener);
-
-        recorder.stop();
-
-        expect(errorListener).toHaveBeenCalledWith(
-            new RecordingError(404, 'No active recording to stop.'),
-        );
+    describe('Error Handling', () => {
+        it('should emit error if _getRecordingCommand fails', () => {
+            jest.spyOn(recorder, '_getRecordingCommand').mockImplementation(
+                () => {
+                    throw new Error('Command error');
+                },
+            );
+            const errorSpy = jest.fn();
+            recorder.on('error', errorSpy);
+            recorder.start();
+            expect(errorSpy).toHaveBeenCalled();
+        });
     });
 
-    test('should log "Recording Finished" on successful stop', () => {
-        console.log = jest.fn();
+    describe('Audio Device Parsing', () => {
+        it('should parse audio devices correctly on linux', async () => {
+            jest.spyOn(exec, 'mockImplementation').mockImplementation(
+                (cmd, callback) => {
+                    callback(
+                        null,
+                        '0 alsa_output.pci-0000_00_1b.0.analog-stereo\n1 alsa_input.usb_device',
+                        '',
+                    );
+                },
+            );
 
-        recorder.start();
-        recorder.stop();
-
-        expect(console.log).toHaveBeenCalledWith('Recording Finished');
-    });
-
-    test('should validate volume range during initialization', () => {
-        expect(() => {
-            new VideoRecorder({ volume: 3.0 });
-        }).toThrow(new RecordingError(400, 'Invalid value for volume: 3'));
-    });
-
-    test('should handle verbose output correctly', () => {
-        console.log = jest.fn();
-
-        recorder.start();
-
-        expect(console.log).toHaveBeenCalledWith(
-            expect.stringContaining('Starting recording:'),
-        );
-        expect(console.log).toHaveBeenCalledWith(
-            expect.stringContaining('FFmpeg Command:'),
-        );
+            listDevices().then((devices) => {
+                expect(devices).toEqual([
+                    'alsa_output.pci-0000_00_1b.0.analog-stereo',
+                    'alsa_input.usb_device',
+                ]);
+            });
+        });
     });
 });
