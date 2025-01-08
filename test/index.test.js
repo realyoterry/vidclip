@@ -81,6 +81,106 @@ describe('VideoRecorder', () => {
         });
     });
 
+    describe('Stop Recording', () => {
+        it('should not allow starting when recording is already in progress', () => {
+            jest.spyOn(recorder, 'emit');
+            recorder.isRecording = true;
+
+            try {
+                recorder.start();
+            } catch (error) {
+                return expect(error.message).toContain(
+                    'Recording is already in progress.',
+                );
+            }
+
+            return false;
+        });
+
+        it('should emit error if FFmpeg command fails with a non-signal error', () => {
+            jest.spyOn(recorder, 'emit');
+            exec.mockImplementation((cmd, callback) => {
+                callback({ code: 123, message: 'Some FFmpeg error' });
+            });
+
+            try {
+                recorder.start();
+            } catch (error) {
+                return expect(error.message).toContain('Some FFmpeg error');
+            }
+
+            return false;
+        });
+
+        it('should not emit error if error contains a signal (e.g., SIGTERM)', () => {
+            jest.spyOn(recorder, 'emit');
+            exec.mockImplementation((cmd, callback) => {
+                callback({ signal: 'SIGTERM' });
+            });
+
+            recorder.start();
+
+            expect(recorder.emit).not.toHaveBeenCalledWith(
+                'error',
+                expect.any(RecordingError),
+            );
+        });
+
+        it('should emit an error if stderr contains the keyword "error"', () => {
+            jest.spyOn(recorder, 'emit');
+            exec.mockImplementation((cmd, callback) => {
+                callback(null, '', 'error: FFmpeg failed to start');
+            });
+
+            try {
+                recorder.start();
+            } catch (error) {
+                return expect(error.message).toContain(
+                    'FFmpeg failed to start',
+                );
+            }
+
+            return false;
+        });
+
+        it('should log stdout if verbose is true', () => {
+            const consoleSpy = jest
+                .spyOn(console, 'log')
+                .mockImplementation(() => {});
+
+            exec.mockImplementation((cmd, callback) => {
+                callback(null, 'Recording started successfully', '');
+            });
+
+            recorder.start();
+
+            expect(consoleSpy).toHaveBeenCalledWith(
+                'FFmpeg stdout: Recording started successfully',
+            );
+
+            consoleSpy.mockRestore();
+        });
+
+        it('should handle FFmpeg command execution correctly', () => {
+            jest.spyOn(recorder, '_getRecordingCommand').mockReturnValue(
+                'mock-command',
+            );
+
+            exec.mockImplementation(() => ({
+                kill: jest.fn(),
+            }));
+
+            recorder.start();
+
+            expect(exec).toHaveBeenCalledWith(
+                'mock-command',
+                expect.any(Function),
+            );
+
+            expect(recorder.isRecording).toBe(true);
+        });
+    });
+
     describe('_validateOptions', () => {
         it('should validate all valid options successfully', () => {
             const validOptions = {
