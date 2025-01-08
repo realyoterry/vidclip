@@ -21,20 +21,17 @@ const RecordingError = require('./RecordingError');
 /**
  * Lists available audio devices based on the platform.
  *
- * @returns {Promise<string[]>} A promise that resolves with a list of available audio devices.
+ * @param {string} [customPlatform] - The platform to use for listing devices (e.g., 'win32', 'darwin', 'linux').
+ * @returns {Promise<string>} A promise that resolves with a string that lists available audio devices.
  * @throws {RecordingError} If the platform is unsupported.
  *
  * @example
- * listAudioDevices().then(devices => {
- *   console.log(devices);
- * }).catch(error => {
- *   console.error(error);
- * });
+ * listDevices().then(console.log).catch(console.error);
  */
-function listAudioDevices() {
+async function listDevices(customPlatform = platform) {
     let command;
 
-    switch (platform) {
+    switch (customPlatform) {
         case 'win32':
             command = `${ffmpeg} -list_devices true -f dshow -i dummy`;
             break;
@@ -45,36 +42,12 @@ function listAudioDevices() {
             command = `pactl list sources short`;
             break;
         default:
-            return Promise.reject(
-                new RecordingError(400, 'Unsupported platform.'),
-            );
+            throw new RecordingError(400, 'Unsupported platform.');
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         exec(command, (error, stdout, stderr) => {
-            if (error) {
-                return reject(
-                    new RecordingError(
-                        500,
-                        `Failed to list audio devices: ${error.message}`,
-                    ),
-                );
-            }
-
-            const output = platform === 'linux' ? stdout : stderr;
-            const regex =
-                platform === 'linux'
-                    ? /(\d+)\s+(\w+)\s+(\w+)\s+(.+)/g
-                    : /"([^"]+)"/g;
-
-            const devices = [];
-            let match;
-
-            while ((match = regex.exec(output)) !== null) {
-                devices.push(match[1]);
-            }
-
-            resolve(devices.sort());
+            resolve(stdout || stderr || error);
         });
     });
 }
@@ -226,19 +199,24 @@ class VideoRecorder extends EventEmitter {
      */
     _getRecordingCommand(filePath) {
         const videoInput = quote([this.source]);
-        const audioOptions = this.recordAudio
-            ? this._getAudioOptions(platform, this.audioSource).replace(
-                  /'/g,
-                  '"',
-              )
-            : '';
         const codecOptions = `-c:v ${quote([this.codec])} -preset ${quote([this.preset])} -pix_fmt yuv420p`;
-        const resolution = this.resolution
-            ? `-s ${quote([this.resolution])}`
-            : '';
         const frameRate = quote([this.frameRate.toString()]);
         const extraArgs = this.extraArgs.map((arg) => quote([arg])).join(' ');
         const outputPath = quote([filePath]);
+
+        let audioOptions = '';
+        let resolution = '';
+
+        if (this.recordAudio) {
+            audioOptions = this._getAudioOptions(
+                platform,
+                this.audioSource,
+            ).replace(/'/g, '"');
+        }
+
+        if (this.resolution) {
+            resolution = `-s ${quote([this.resolution])}`;
+        }
 
         return `${ffmpeg} -y -f ${getPlatformInput(platform)} -framerate ${frameRate} -i ${videoInput} ${audioOptions} ${resolution} ${codecOptions} ${extraArgs} ${outputPath}`;
     }
@@ -296,11 +274,10 @@ class VideoRecorder extends EventEmitter {
      */
     start() {
         if (this.isRecording) {
-            this.emit(
+            return this.emit(
                 'error',
                 new RecordingError(409, 'Recording is already in progress.'),
             );
-            return;
         }
 
         const filePath = getFilePath(
@@ -315,8 +292,7 @@ class VideoRecorder extends EventEmitter {
         try {
             command = this._getRecordingCommand(filePath);
         } catch (error) {
-            this.emit('error', new RecordingError(500, error.message));
-            return;
+            return this.emit('error', new RecordingError(500, error.message));
         }
 
         if (this.verbose) {
@@ -326,20 +302,21 @@ class VideoRecorder extends EventEmitter {
 
         this.process = exec(command, (error, stdout, stderr) => {
             if (error) {
-                if (error.signal === 'SIGINT') {
+                if (error.signal?.includes('SIG')) {
                     return;
                 }
 
-                this.emit(
+                return this.emit(
                     'error',
-                    new RecordingError(error.code ?? 500, error.message),
+                    new RecordingError(
+                        error.code ?? 500,
+                        error.message ?? 'Unknown Error.',
+                    ),
                 );
-                return;
             }
 
-            if (stderr) {
-                this.emit('error', new RecordingError(500, stderr));
-                return;
+            if (stderr && stderr.includes('error')) {
+                return this.emit('error', new RecordingError(500, stderr));
             }
 
             if (stdout && this.verbose) {
@@ -368,20 +345,9 @@ class VideoRecorder extends EventEmitter {
             return;
         }
 
-        try {
-            if (this.process) {
-                this.process.kill('SIGINT');
-                this.process.stdin.write('q\n');
-            }
-        } catch (err) {
-            this.process.kill('SIGKILL');
-            this.emit(
-                'error',
-                new RecordingError(
-                    500,
-                    `Failed to stop recording: ${err.message}`,
-                ),
-            );
+        if (this.process) {
+            this.process.kill('SIGINT');
+            this.process.stdin.write('q\n');
         }
 
         if (this.verbose) {
@@ -397,5 +363,5 @@ class VideoRecorder extends EventEmitter {
 
 module.exports = {
     VideoRecorder,
-    listAudioDevices,
+    listDevices,
 };

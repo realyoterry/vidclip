@@ -1,4 +1,4 @@
-const { VideoRecorder } = require('../src/index.js');
+const { VideoRecorder, listDevices } = require('../src/index.js');
 
 const recorder = new VideoRecorder({
     outputPath: './testRecordings',
@@ -11,6 +11,11 @@ const recorder = new VideoRecorder({
     includeUUID: false,
     recordAudio: true,
     audioSource: 'Stereo Mix (Realtek(R) Audio)',
+});
+
+listDevices().then((devices) => {
+    console.log(devices);
+    console.log(typeof devices);
 });
 
 recorder.start();

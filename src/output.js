@@ -33,8 +33,9 @@ function ensureOutputDirExists(outputPath) {
  */
 function getFilePath(outputPath, fileName, format, includeUUID) {
     if (!fileName || !format) {
-        throw new RecordingError('fileName and format are required');
+        throw new RecordingError(400, 'fileName and format are required');
     }
+
     const sanitizedFileName = fileName.replace(/[<>:"/\\|?*]+/g, '_');
     const finalFileName = includeUUID
         ? `${sanitizedFileName}_${uuidv4()}.${format}`
