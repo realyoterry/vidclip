@@ -345,20 +345,9 @@ class VideoRecorder extends EventEmitter {
             return;
         }
 
-        try {
-            if (this.process) {
-                this.process.kill('SIGINT');
-                this.process.stdin.write('q\n');
-            }
-        } catch (err) {
-            this.process.kill('SIGKILL');
-            this.emit(
-                'error',
-                new RecordingError(
-                    500,
-                    `Failed to stop recording: ${err.message}`,
-                ),
-            );
+        if (this.process) {
+            this.process.kill('SIGINT');
+            this.process.stdin.write('q\n');
         }
 
         if (this.verbose) {

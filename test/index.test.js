@@ -81,6 +81,22 @@ describe('VideoRecorder', () => {
         });
     });
 
+    it('should call process.kill and process.stdin.write when process exists', () => {
+        const mockKill = jest.fn();
+        const mockWrite = jest.fn();
+        const mockProcess = {
+            kill: mockKill,
+            stdin: {
+                write: mockWrite,
+            },
+        };
+        recorder.start();
+        recorder.process = mockProcess;
+        recorder.stop();
+        expect(mockKill).toHaveBeenCalledWith('SIGINT');
+        expect(mockWrite).toHaveBeenCalledWith('q\n');
+    });
+
     describe('Stop Recording', () => {
         it('should not allow starting when recording is already in progress', () => {
             jest.spyOn(recorder, 'emit');
@@ -354,6 +370,50 @@ describe('VideoRecorder', () => {
         it('should reject for unsupported platforms', () => {
             return listDevices('unknown').catch((error) => {
                 expect(error).toBeInstanceOf(RecordingError);
+            });
+        });
+
+        describe('listDevices', () => {
+            it('should resolve with stdout if stdout exists', async () => {
+                exec.mockImplementation((cmd, callback) => {
+                    callback(null, 'Mock stdout', null);
+                });
+
+                const result = await listDevices('win32');
+                expect(result).toBe('Mock stdout');
+            });
+
+            it('should resolve with stderr if stdout is absent and stderr exists', async () => {
+                exec.mockImplementation((cmd, callback) => {
+                    callback(null, null, 'Mock stderr');
+                });
+
+                const result = await listDevices('darwin');
+                expect(result).toBe('Mock stderr');
+            });
+
+            it('should resolve with error if stdout and stderr are absent', async () => {
+                exec.mockImplementation((cmd, callback) => {
+                    callback('Mock error', null, null);
+                });
+
+                const result = await listDevices('linux');
+                expect(result).toBe('Mock error');
+            });
+
+            it('should resolve with undefined if stdout, stderr, and error are absent', async () => {
+                exec.mockImplementation((cmd, callback) => {
+                    callback(null, null, null);
+                });
+
+                const result = await listDevices('win32');
+                expect(result).toBeNull();
+            });
+
+            it('should throw an error if an unsupported platform is provided', async () => {
+                await expect(listDevices('unsupported')).rejects.toThrowError(
+                    new RecordingError(400, 'Unsupported platform.'),
+                );
             });
         });
     });
