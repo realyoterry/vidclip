@@ -5,10 +5,9 @@
     "main": "src/index.js",
     "scripts": {
         "build": "npm ci",
-        "test": "node src/index.js && jest && npm run read",
-        "format": "prettier --write .",
-        "read": "prettier --check ."
+        "test": "node src/index.ts && jest"
     },
+    "type": "module",
     "author": "Terry Kim",
     "license": "MIT",
     "keywords": [
@@ -24,15 +23,13 @@
     ],
     "dependencies": {
         "@ffmpeg-installer/ffmpeg": "^1.1.0",
-        "shell-quote": "^1.8.2",
-        "uuid": "^11.0.4"
+        "shell-quote": "^1.8.2"
     },
     "repository": {
         "type": "git",
         "url": "https://github.com/realyoterry/vidclip.git"
     },
     "devDependencies": {
-        "jest": "^29.7.0",
-        "prettier": "^3.4.2"
+        "jest": "^29.7.0"
     }
 }

@@ -10,43 +10,23 @@
     <a href="https://codecov.io/gh/realyoterry/vidclip"><img src="https://codecov.io/gh/realyoterry/vidclip/branch/beta/graph/badge.svg"/></a>
 </p>
 
----
-
 <p align="center">A highly customizable, lightweight screen & audio recorder.</p>
-
-## Contents
-
-- [Features](#features)
-    - [Before you get started](#before-you-get-started)
-- [Installation](#installation)
-- [Usage](#usage)
-    - [Importing the application](#1-importing-the-application)
-    - [Using basic functions](#2-using-basic-functions)
-- [Other](#other)
-    - [Contributing](#contributing)
-    - [License](#license)
-    - [Contact](#contact)
 
 ## Features
 
-- Record & capture your whole desktop / webcam with/without audio
+- Record & capture your whole desktop
 - Save recordings in various formats (MP4, MOV, MKV etc.)
 - Adjustable frame rate, resolution, bitrate and much more
 - Audio recording from microphone and/or system sound
-- Lightweight and minimal resource usage
 
 #### \*Before you get started:
 
-- Familiarize yourself with the [Node.js basics](https://developer.mozilla.org/en-US/docs/Web/JavaScript).
-- Please be respectful and kind in our community.
-- **Windows users who are recording sound** - PLEASE make sure you have Stereo Mix enabled. To enable it, go to `Settings > System > Sound > More sound settings > Recording > Stereo Mix`. The stereo mix is for recordig desktop audio.
+- **Windows users who are recording sound** - Please make sure you have Stereo Mix enabled. To enable it, go to `Settings > System > Sound > More sound settings > Recording > Stereo Mix`. The stereo mix is for recordig desktop audio.
 
 ## Installation
 
-_Make sure a package manager has been installed before starting._
-
 ```bash
-npm install vidclip@latest
+npm install vidclip
 yarn add vidclip
 pnpm add vidclip
 bun add vidclip
@@ -54,63 +34,42 @@ bun add vidclip
 
 ## Usage
 
-Here's a quick example on how to use the basic features of this package. Full and detailed documentation is on the [Vidclip documentation.](https://vidclip.js.org)
+Here's a quick example on how to use the basic features of this package.
 
----
-
-### 1. Importing the application:
+### 1. Import the application:
 
 Make sure you have installed the package first.
 
 ```js
 // If you use CommonJS...
-const record = require('vidclip');
+const Recorder = require('vidclip');
 
 // If you use ES Modules...
-import record from 'vidclip';
+import Recorder from 'vidclip';
 ```
 
-By default, CommonJS would be enabled.
+### 2. Start the recording
 
----
-
-### 2. Using basic functions:
-
-This is the point where you can actually start recording. Here's a quick example.
+Here's a simple usage of the `start()` function:
 
 ```js
-const recorder = new record.VideoRecorder({
-    outputPath: './testRecordings',
-    fileName: 'testRecording',
-    format: 'mp4',
-    frameRate: 30,
-    resolution: '1280x720',
-    verbose: true,
-    includeUUID: false,
-    recordAudio: true,
-    audioSource: 'Stereo Mix (Realtek(R) Audio)',
+const recorder = new Recorder({
+    resolution: '1920x1080', // Resolution (`width`x`height`)
+    frameRate: 30, // Frame rate (one of 24, 30, 60 and 120)
+    fileFormat: 'mp4', // Video encoding format
+    audioSource: 'Stereo Mix (Realtek(R) Audio)', // Audio device name
+    outputFile: 'myFolder/myVideo', // Where to store the video
+    timeOut: 5, // Record for 5 seconds
+    replaceExisting: true, // Whether to replace an existing file in the same path or not
+    verbose: true, // Log everything into the console
 });
 
 recorder.start();
 
-setTimeout(() => {
-    recorder.stop();
-}, 10000);
+// use recorder.stop() if you haven't set the timeOut option
 ```
-
-##### \*Note: This is just an example, showcasing the different customizable settings. Please see the [Vidclip documentation](https://vidclip.js.org) to explore in more detail.
 
 ---
-
-You can also list the exact name of the **enabled** audio sources to capture audio.
-
-```js
-listDevices().then(console.log);
-```
-
-Then, set the `audioSource` option to the desired device you would like to use.
-
-## Other
 
 Please take a look here before opening an pull request / issue!
 
@@ -120,7 +79,7 @@ Contributions are welcome to everyone! Please make sure you have read the [CONTR
 
 ### Security
 
-If you discover any security vulnerabilities, we kindly ask you to read the [SECURITY.md](https://github.com/realyoterry/vidclip/blob/main/SECURITY.md), then create an issue. We take security **very seriously**, and will address the reported vulnerabilities as quickly as possible. Your cooperation and assistance in maintaining the security of this project are greatly appreciated.
+If you discover any security vulnerabilities, read the [SECURITY.md](https://github.com/realyoterry/vidclip/blob/main/SECURITY.md) file, then create an issue.
 
 ### License
 
@@ -128,4 +87,4 @@ This project is licensed under the MIT License. See the [LICENSE](https://github
 
 ### Contact
 
-For any questions or suggestions, please open an [issue](https://github.com/realyoterry/vidclip/issues) or contact me at [theterrykim@gmail.com](mailto:theterrykim@gmail.com).
+For any questions or suggestions, please open an [issue](https://github.com/realyoterry/vidclip/issues) or contact me at [theterryaki@gmail.com](mailto:theterryaki@gmail.com).
