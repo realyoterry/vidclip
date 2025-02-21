@@ -6,7 +6,8 @@
     "types": "lib/index.d.ts",
     "module": "lib/index.mjs",
     "scripts": {
-        "test": "node src/index.ts && jest",
+        "test": "npm run build && node lib/index.js && jest",
+        "coverage": "npm run build && jest --coverage",
         "build:esm": "tsc -b tsconfig.esm.json && node scripts/esm-post-process.mjs",
         "build:cjs": "tsc -b tsconfig.cjs.json",
         "build": "npm run build:esm && npm run build:cjs",
