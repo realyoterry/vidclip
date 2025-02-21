@@ -2,16 +2,6 @@
 /testRecordings
 /coverage
 /package-lock.json
-/SECURITY.node_modules
-/LICENSE
-/CONTRIBUTING.md
-/COMMIT_CONVENTION.md
-/.gitignore
-/test/
-/public
-/src
-/public
-/.github
 
 npm-debug.log*
 yarn-debug.log*
