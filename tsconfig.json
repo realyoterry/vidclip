@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "target": "es2019",
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "useUnknownInCatchVariables": false,
+        "skipLibCheck": true,
+        "checkJs": true,
+        "jsx": "preserve",
+        "outDir": "./dist"
+    },
+    "include": [
+        "src",
+        "tests",
+        "scripts"
+    ]
+}

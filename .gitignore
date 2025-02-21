@@ -1,8 +1,10 @@
 /node_modules
-/testRecordings
 /coverage
 /package-lock.json
+/lib
 
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+tsconfig.cjs.tsbuildinfo
+tsconfig.esm.tsbuildinfo

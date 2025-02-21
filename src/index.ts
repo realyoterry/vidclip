@@ -1,12 +1,10 @@
+// if there is an error while recording make sure the
+// ffmpeg process is terminated by checking task manager.
+
 import ffmpeg from '@ffmpeg-installer/ffmpeg';
-import { existsSync } from 'fs';
 import { ChildProcess, spawn } from 'child_process';
 
 const ffmpegPath = ffmpeg.path;
-
-if (!existsSync(ffmpegPath)) {
-    throw new Error('FFmpeg binary not found. Reinstalling may fix the problem.');
-}
 
 interface RecorderTypes {
     resolution?: `${number}x${number}`;
@@ -19,7 +17,7 @@ interface RecorderTypes {
     verbose?: boolean;
 }
 
-export default class Recorder {
+export class Recorder {
     private readonly config: RecorderTypes;
     private ffmpegProcess: ChildProcess | null = null;
 
@@ -35,7 +33,7 @@ export default class Recorder {
     }: RecorderTypes = {}) {
         const format = fileFormat ?? 'mp4';
 
-        // Setup configuration
+        // config object
         this.config = {
             resolution: resolution ?? '1920x1080',
             frameRate: frameRate ?? 30,
@@ -48,13 +46,14 @@ export default class Recorder {
         };
     }
 
-    // Getter functions
+    // get functions
     get getConfig(): RecorderTypes {
         return { ...this.config };
     }
 
-    // Public functions
+    // public functions
     public start() {
+        // prettier-ignore
         const ffmpegArgs: string[] = [
             ...(this.config.replaceExisting ? ['-y'] : ['-n']),
             '-f', 'gdigrab',
@@ -73,12 +72,12 @@ export default class Recorder {
         try {
             this.ffmpegProcess = spawn(ffmpegPath, ffmpegArgs, {
                 stdio: this.config.verbose ? ['pipe', 'inherit', 'inherit'] : ['pipe', 'ignore', 'ignore'],
-            });            
+            });
 
             this.ffmpegProcess.on('error', () => {
                 return this.stop(true);
             });
-        } catch(error) {
+        } catch (error) {
             this.stop(true);
             throw error;
         }
@@ -86,17 +85,13 @@ export default class Recorder {
 
     public stop(force?: boolean) {
         if (this.ffmpegProcess) {
-            // Perform multiple checks to insure ffmpegProcess gets terminated
+            // perform multiple checks so ffmpegProcess gets terminated
+            force ? this.ffmpegProcess.kill('SIGKILL') : this.ffmpegProcess.kill('SIGINT');
             this.ffmpegProcess.stdin?.write('q');
             this.ffmpegProcess.stdin?.end();
-            force ? this.ffmpegProcess.kill('SIGKILL') : this.ffmpegProcess.kill('SIGINT');
+            this.ffmpegProcess = null;
 
-            this.ffmpegProcess.on('close', (code) => {
-                console.log(`ffmpegProcess closed with code ${code}.`);
-                this.ffmpegProcess = null;
-            });
-
-            console.log('ffmpegProcess successfully terminated..');
+            console.log('ffmpegProcess successfully terminated.');
         } else {
             console.warn('ffmpegProcess is undefined.');
         }

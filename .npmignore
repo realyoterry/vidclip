@@ -2,10 +2,12 @@
 /public
 /test
 /.vscode
+/tsconfig.json
 /package-lock.json
 /SECURITY.md
 /LICENSE
 /docs
+/src
 /.prettierrc
 /.gitignore
 /.prettierignore
