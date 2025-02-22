@@ -1,6 +1,6 @@
 {
     "name": "vidclip",
-    "version": "4.0.0",
+    "version": "5.0.0",
     "description": "A highly customizable, lightweight screen recorder.",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
