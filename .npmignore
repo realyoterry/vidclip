@@ -13,3 +13,9 @@
 /.prettierignore
 /COMMIT_CONVENTION.md
 /CONTRIBUTING.md
+/tsconfig.cjs.tsbuildinfo
+/tsconfig.esm.tsbuildinfo
+/scripts/esm-post-process.mjs
+/tsconfig.json
+/tsconfig.esm.json
+/tsconfig.cjs.json
