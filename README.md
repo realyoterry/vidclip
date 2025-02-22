@@ -7,7 +7,6 @@
     <a href="https://github.com/realyoterry/vidclip/blob/main/LICENSE"><img src="https://img.shields.io/github/license/realyoterry/vidclip"></img></a>
     <a href="https://npm-stat.com/charts.html?package=vidclip&from=2024-11-01"><img src="https://img.shields.io/npm/d18m/vidclip.svg?maxAge=3600"></img></a>
     <a href="https://github.com/realyoterry/vidclip/actions/workflows/nodejs.yml"><img src="https://github.com/realyoterry/vidclip/actions/workflows/nodejs.yml/badge.svg"></img></a>
-    <a href="https://codecov.io/gh/realyoterry/vidclip"><img src="https://codecov.io/gh/realyoterry/vidclip/branch/beta/graph/badge.svg"/></a>
 </p>
 
 <p align="center">A highly customizable, lightweight screen & audio recorder.</p>
@@ -41,11 +40,10 @@ Here's a quick example on how to use the basic features of this package.
 Make sure you have installed the package first.
 
 ```js
-// If you use CommonJS...
-const Recorder = require('vidclip');
+const { Recorder } = require('vidclip');
 
-// If you use ES Modules...
-import Recorder from 'vidclip';
+// or if you use ESM:
+import { Recorder } from 'vidclip';
 ```
 
 ### 2. Start the recording
@@ -54,37 +52,31 @@ Here's a simple usage of the `start()` function:
 
 ```js
 const recorder = new Recorder({
-    resolution: '1920x1080', // Resolution (`width`x`height`)
-    frameRate: 30, // Frame rate (one of 24, 30, 60 and 120)
-    fileFormat: 'mp4', // Video encoding format
-    audioSource: 'Stereo Mix (Realtek(R) Audio)', // Audio device name
-    outputFile: 'myFolder/myVideo', // Where to store the video
-    timeOut: 5, // Record for 5 seconds
-    replaceExisting: true, // Whether to replace an existing file in the same path or not
-    verbose: true, // Log everything into the console
+    resolution: '1920x1080', // {width}x{height}
+    frameRate: 30, // one of 24, 30, 60 and 120
+    fileFormat: 'mp4', // one of mp4, mov, wmv, avi and mkv
+    audioSource: 'Stereo Mix (Realtek(R) Audio)', // one of your enabled audio devices
+    outputFile: 'recordings/recording.mp4', // any directory you want to store the video (inside the current directory)
+    replaceExisting: true, // replace an existing file?
+    verbose: false, // output necessary logs into the console?
+    rateControl: { mode: 'crf', value: 18 }, // one of crf, cq, bitrate, and qp
+    codec: 'libx264', // one of libx264, libx265, libvpx-vp9, h264_nvenc, hevc_nvenc, h264_qsv, hevc_qsv, and hev264_amf
+    preset: 'fast', // one of placebo, veryslow, slower, slow, medium, fast, faster, veryfast, superfast, and ultrafast
+    pixelFormat: 'yuv420p', // one of yuv420p, yuv422p, yuv444p, rgb24, gray, and nv12
 });
 
-recorder.start();
+recorder.start({
+    stopAfter: 5, // how long for the recording to run
+});
 
-// use recorder.stop() if you haven't set the timeOut option
+/* an alternative:
+ *
+ * setTimeout(() => {
+ *    recorder.stop();
+ * }, 5000);
+*/
 ```
 
----
-
-Please take a look here before opening an pull request / issue!
-
-### Contributing
-
-Contributions are welcome to everyone! Please make sure you have read the [CONTRIBUTING.md](https://github.com/realyoterry/vidclip/bloc/main/CONTRIBUTING.md) file, and the [COMMIT_CONVENTION.md](https://github.com/realyoterry/vidclip/blob/main/COMMIT_CONVENTION.md) file before you get started. When you are done, make a pull request at the [GitHub repository](https://github.com/realyoterry/vidclip).
-
-### Security
-
-If you discover any security vulnerabilities, read the [SECURITY.md](https://github.com/realyoterry/vidclip/blob/main/SECURITY.md) file, then create an issue.
-
-### License
+## License
 
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/realyoterry/vidclip/blob/main/LICENSE) file for details.
-
-### Contact
-
-For any questions or suggestions, please open an [issue](https://github.com/realyoterry/vidclip/issues) or contact me at [theterryaki@gmail.com](mailto:theterryaki@gmail.com).

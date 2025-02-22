@@ -1,6 +1,9 @@
 // if there is an error while recording make sure the
 // ffmpeg process is terminated by checking task manager.
 
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import ffmpeg from '@ffmpeg-installer/ffmpeg';
 import { ChildProcess, spawn } from 'child_process';
 
@@ -12,14 +15,21 @@ interface RecorderTypes {
     fileFormat?: 'mp4' | 'mov' | 'wmv' | 'avi' | 'mkv';
     audioSource?: string;
     outputFile?: string;
-    timeOut?: number;
     replaceExisting?: boolean;
     verbose?: boolean;
+    rateControl?: {
+        mode: 'crf' | 'cq' | 'bitrate' | 'qp';
+        value: number;
+    };
+    codec?: 'libx264' | 'libx265' | 'libvpx-vp9' | 'h264_nvenc' | 'hevc_nvenc' | 'h264_qsv' | 'hevc_qsv' | 'hev264_amf';
+    preset?: 'placebo' | 'veryslow' | 'slower' | 'slow' | 'medium' | 'fast' | 'faster' | 'veryfast' | 'superfast' | 'ultrafast';
+    pixelFormat?: 'yuv420p' | 'yuv422p' | 'yuv444p' | 'rgb24' | 'gray' | 'nv12';
 }
 
 export class Recorder {
     private readonly config: RecorderTypes;
     private ffmpegProcess: ChildProcess | null = null;
+    public isRecording = false;
 
     constructor({
         resolution,
@@ -27,9 +37,12 @@ export class Recorder {
         fileFormat,
         audioSource,
         outputFile,
-        timeOut,
         replaceExisting,
         verbose,
+        rateControl,
+        codec,
+        preset,
+        pixelFormat,
     }: RecorderTypes = {}) {
         const format = fileFormat ?? 'mp4';
 
@@ -39,11 +52,20 @@ export class Recorder {
             frameRate: frameRate ?? 30,
             fileFormat: format,
             audioSource,
-            outputFile: outputFile ?? `output.${format}`,
-            timeOut,
+            outputFile: outputFile ?? `recordings/recording.${format}`,
             replaceExisting: replaceExisting ?? true,
             verbose: verbose ?? false,
+            rateControl: rateControl ?? { mode: 'crf', value: 18 },
+            codec: codec ?? 'libx264',
+            preset: preset ?? 'fast',
+            pixelFormat: pixelFormat ?? 'yuv420p',
         };
+
+        const dir = path.dirname(this.config.outputFile!);
+
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
     }
 
     // get functions
@@ -52,29 +74,47 @@ export class Recorder {
     }
 
     // public functions
-    public start() {
+    public start({ stopAfter }: { stopAfter?: number } = {}) {
+        const platform = os.platform();
+        const ffmpegArgs: string[] = [];
+
         // prettier-ignore
-        const ffmpegArgs: string[] = [
+        ffmpegArgs.push(
             ...(this.config.replaceExisting ? ['-y'] : ['-n']),
-            '-f', 'gdigrab',
+            '-f',
+            platform === 'win32' ? 'gdigrab' : platform === 'darwin' ? 'avfoundation' : 'x11grab',
             '-framerate', String(this.config.frameRate),
             '-video_size', this.config.resolution!,
-            '-i', 'desktop',
-            '-c:v', 'libx264',
-            '-preset', 'ultrafast',
-            '-pix_fmt', 'yuv420p',
-            '-crf', '18',
-            ...(this.config.audioSource ? ['-f', 'dshow', '-i', `audio=${this.config.audioSource}`] : []),
-            ...(this.config.timeOut ? ['-t', String(this.config.timeOut)] : []),
-            this.config.outputFile!,
-        ];
+            '-i',
+            platform === 'darwin' ? '1' : platform === 'win32' ? 'desktop' : ':0.0',
+            '-c:v', this.config.codec!,
+            '-preset', this.config.preset!,
+            '-pix_fmt', this.config.pixelFormat!,
+            ...(this.config.rateControl
+                ? [
+                    this.config.rateControl.mode === 'crf' ? '-crf' :
+                    this.config.rateControl.mode === 'cq' ? '-cq' :
+                    this.config.rateControl.mode === 'bitrate' ? '-b:v' :
+                    this.config.rateControl.mode === 'qp' ? '-qp' : '',
+                    this.config.rateControl.mode === 'bitrate'
+                        ? `${this.config.rateControl.value}k`
+                        : String(this.config.rateControl.value)
+                  ]
+                : []),
+            ...(this.config.audioSource ? platform === 'win32' ? ['-f', 'dshow', '-i', `audio=${this.config.audioSource}`] : platform === 'darwin' ? ['-f', 'avfoundation', '-i', this.config.audioSource] : ['-f', 'pulse', '-i', 'default'] : []),
+            ...(stopAfter ? ['-t', String(stopAfter)] : []),
+            this.config.outputFile!
+        );
 
         try {
             this.ffmpegProcess = spawn(ffmpegPath, ffmpegArgs, {
                 stdio: this.config.verbose ? ['pipe', 'inherit', 'inherit'] : ['pipe', 'ignore', 'ignore'],
             });
 
-            this.ffmpegProcess.on('error', () => {
+            this.isRecording = true;
+
+            this.ffmpegProcess.on('error', (error) => {
+                console.error(`ffmpegProcess error: ${error.message}`);
                 return this.stop(true);
             });
         } catch (error) {
@@ -84,6 +124,8 @@ export class Recorder {
     }
 
     public stop(force?: boolean) {
+        this.isRecording = false;
+
         if (this.ffmpegProcess) {
             // perform multiple checks so ffmpegProcess gets terminated
             force ? this.ffmpegProcess.kill('SIGKILL') : this.ffmpegProcess.kill('SIGINT');
@@ -93,7 +135,7 @@ export class Recorder {
 
             console.log('ffmpegProcess successfully terminated.');
         } else {
-            console.warn('ffmpegProcess is undefined.');
+            console.warn('ffmpegProcess is nullish.');
         }
     }
 }
