@@ -114,7 +114,7 @@ export class Recorder {
             this.isRecording = true;
 
             this.ffmpegProcess.on('error', (error) => {
-                console.error(`ffmpegProcess error: ${error.message}`);
+                console.error(`ffmpegProcess error: ${error?.message ?? error}`);
                 return this.stop(true);
             });
         } catch (error) {

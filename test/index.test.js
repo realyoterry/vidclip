@@ -57,7 +57,7 @@ describe('Recorder Class', () => {
     test('should log a warning when stop is called without starting', () => {
         console.warn = jest.fn();
         recorder.stop();
-        expect(console.warn).toHaveBeenCalledWith('ffmpegProcess is undefined.');
+        expect(console.warn).toHaveBeenCalledWith('ffmpegProcess is nullish.');
     });
 
     test('should log and set ffmpegProcess to null when closed', () => {
