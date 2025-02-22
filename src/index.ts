@@ -21,7 +21,7 @@ interface RecorderTypes {
         mode: 'crf' | 'cq' | 'bitrate' | 'qp';
         value: number;
     };
-    codec?: 'libx264' | 'libx265' | 'libvpx-vp9' | 'h264_nvenc' | 'hevc_nvenc' | 'h264_qsv' | 'hevc_qsv' | 'hev264_amf';
+    codec?: 'libx264' | 'libx265' | 'libvpx-vp9' | 'h264_nvenc' | 'hevc_nvenc' | 'h264_qsv' | 'hevc_qsv' | 'h264_amf' | 'hevc_amf';
     preset?: 'placebo' | 'veryslow' | 'slower' | 'slow' | 'medium' | 'fast' | 'faster' | 'veryfast' | 'superfast' | 'ultrafast';
     pixelFormat?: 'yuv420p' | 'yuv422p' | 'yuv444p' | 'rgb24' | 'gray' | 'nv12';
 }
@@ -76,35 +76,29 @@ export class Recorder {
     // public functions
     public start({ stopAfter }: { stopAfter?: number } = {}) {
         const platform = os.platform();
-        const ffmpegArgs: string[] = [];
-
         // prettier-ignore
-        ffmpegArgs.push(
+        const ffmpegArgs = [
             ...(this.config.replaceExisting ? ['-y'] : ['-n']),
-            '-f',
-            platform === 'win32' ? 'gdigrab' : platform === 'darwin' ? 'avfoundation' : 'x11grab',
+            '-thread_queue_size', '512',
+            '-f', platform === 'win32' ? 'gdigrab' : platform === 'darwin' ? 'avfoundation' : 'x11grab',
             '-framerate', String(this.config.frameRate),
             '-video_size', this.config.resolution!,
-            '-i',
-            platform === 'darwin' ? '1' : platform === 'win32' ? 'desktop' : ':0.0',
-            '-c:v', this.config.codec!,
-            '-preset', this.config.preset!,
-            '-pix_fmt', this.config.pixelFormat!,
-            ...(this.config.rateControl
-                ? [
-                    this.config.rateControl.mode === 'crf' ? '-crf' :
-                    this.config.rateControl.mode === 'cq' ? '-cq' :
-                    this.config.rateControl.mode === 'bitrate' ? '-b:v' :
-                    this.config.rateControl.mode === 'qp' ? '-qp' : '',
-                    this.config.rateControl.mode === 'bitrate'
-                        ? `${this.config.rateControl.value}k`
-                        : String(this.config.rateControl.value)
-                  ]
-                : []),
+            '-i', platform === 'darwin' ? '1' : platform === 'win32' ? 'desktop' : ':0.0',
+
+            // AUDIO INPUT
             ...(this.config.audioSource ? platform === 'win32' ? ['-f', 'dshow', '-i', `audio=${this.config.audioSource}`] : platform === 'darwin' ? ['-f', 'avfoundation', '-i', this.config.audioSource] : ['-f', 'pulse', '-i', 'default'] : []),
+
+            // VIDEO ENCODING
+            '-c:v', this.config.codec!,
+            ...(this.config.preset ? ['-preset', this.config.preset] : []),
+            ...(this.config.pixelFormat ? ['-pix_fmt', this.config.pixelFormat] : []),
+
+            // RATE CONTROL
+            ...(this.config.rateControl ? [this.config.rateControl.mode === 'crf' ? '-crf' : this.config.rateControl.mode === 'cq' ? '-cq' : this.config.rateControl.mode === 'bitrate' ? '-b:v' : this.config.rateControl.mode === 'qp' ? '-qp' : '', this.config.rateControl.mode === 'bitrate' ? `${this.config.rateControl.value}k` : String(this.config.rateControl.value)] : []),
+
             ...(stopAfter ? ['-t', String(stopAfter)] : []),
             this.config.outputFile!
-        );
+        ];
 
         try {
             this.ffmpegProcess = spawn(ffmpegPath, ffmpegArgs, {

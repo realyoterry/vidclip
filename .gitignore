@@ -2,6 +2,7 @@
 /coverage
 /package-lock.json
 /lib
+/recordings
 
 npm-debug.log*
 yarn-debug.log*
