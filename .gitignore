@@ -4,6 +4,7 @@
 /lib
 /recordings
 /docs/.vitepress/cache
+/docs/.vitepress/dist
 
 npm-debug.log*
 yarn-debug.log*
