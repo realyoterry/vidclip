@@ -11,7 +11,10 @@
         "build:esm": "tsc -b tsconfig.esm.json && node scripts/esm-post-process.mjs",
         "build:cjs": "tsc -b tsconfig.cjs.json",
         "build": "npm run build:esm && npm run build:cjs",
-        "format": "prettier --write src/*.ts"
+        "format": "prettier --write src/*.ts",
+        "docs:dev": "vitepress dev docs",
+        "docs:build": "vitepress build docs",
+        "docs:preview": "vitepress preview docs"
     },
     "type": "module",
     "author": "Terry Kim",
@@ -38,7 +41,8 @@
         "glob": "^11.0.1",
         "jest": "^29.7.0",
         "prettier": "^3.5.1",
-        "typescript": "^5.7.3"
+        "typescript": "^5.7.3",
+        "vitepress": "^1.6.3"
     },
     "exports": {
         ".": {

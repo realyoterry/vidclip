@@ -3,6 +3,7 @@
 /package-lock.json
 /lib
 /recordings
+/docs/.vitepress/cache
 
 npm-debug.log*
 yarn-debug.log*

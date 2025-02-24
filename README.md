@@ -9,7 +9,7 @@
     <a href="https://github.com/realyoterry/vidclip/actions/workflows/nodejs.yml"><img src="https://github.com/realyoterry/vidclip/actions/workflows/nodejs.yml/badge.svg"></img></a>
 </p>
 
-<p align="center">A highly customizable, lightweight screen & audio recorder.</p>
+<p align="center">A highly customizable, Node.js screen & audio recorder.</p>
 
 ## Features
 
@@ -17,10 +17,6 @@
 - Save recordings in various formats (MP4, MOV, MKV etc.)
 - Adjustable frame rate, resolution, bitrate and much more
 - Audio recording from microphone and/or system sound
-
-#### \*Before you get started:
-
-- **Windows users who are recording sound** - Please make sure you have Stereo Mix enabled. To enable it, go to `Settings > System > Sound > More sound settings > Recording > Stereo Mix`. The stereo mix is for recordig desktop audio.
 
 ## Installation
 
@@ -62,17 +58,17 @@ const recorder = new Recorder({
     rateControl: { mode: 'crf', value: 18 }, // one of crf, cq, bitrate, and qp
     codec: 'libx264', // one of libx264, libx265, libvpx-vp9, h264_nvenc, hevc_nvenc, h264_qsv, hevc_qsv, and hev264_amf
     preset: 'fast', // one of placebo, veryslow, slower, slow, medium, fast, faster, veryfast, superfast, and ultrafast
-    pixelFormat: 'yuv420p', // one of yuv420p, yuv422p, yuv444p, rgb24, gray, and nv12
+    pixelFormat: 'yuv420p', // one of yuv420p, yuv422p, yuv444p, rgb24, gray, and nv12 (yuv420p highly recommended)
 });
 
 recorder.start({
-    stopAfter: 5, // how long for the recording to run
+    stopAfter: 5, // how long for the recording to run (in seconds)
 });
 
 /* an alternative:
  *
  * setTimeout(() => {
- *    recorder.stop();
+ *    recorder.stop(); // forcefully stop by using SIGKILL
  * }, 5000);
 */
 ```

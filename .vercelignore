@@ -1,0 +1,16 @@
+.github
+public
+scripts
+src
+test
+.gitignore
+.npmignore
+.prettierrc
+CONTRIBUTING.md
+LICENSE
+package-lock.json
+README.md
+SECURITY.md
+tsconfig.cjs.json
+tsconfig.esm.json
+tsconfig.json
