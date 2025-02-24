@@ -2,10 +2,10 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   title: "Vidclip",
-  base: "/vidclip/",
+  base: "/",
   description: "Next generation JavaScript screenshots Tool",
   head: [
-    ['link', { rel: 'icon', href: '/vidclip/favicon.ico' }]
+    ['link', { rel: 'icon', href: '/favicon.ico' }]
   ],
   themeConfig: {
     nav: [
