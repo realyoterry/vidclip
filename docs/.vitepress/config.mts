@@ -3,7 +3,6 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "Vidclip",
   base: "/vidclip/",
-  ignoreDeadLinks: true,
   description: "Next generation JavaScript screenshots Tool",
   head: [
     ['link', { rel: 'icon', href: '/vidclip/favicon.ico' }]

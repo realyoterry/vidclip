@@ -87,4 +87,4 @@ Please be patient while I try to respond to you as fast as possible.
 
 ---
 
-*Aaaaaannnddd...* that's all for **getting started**! Now, you can start to [configure](/configuration) your own video recorder.
+*Aaaaaannnddd...* that's all for **getting started**! Now, you can start to **configure** your own video recorder.
