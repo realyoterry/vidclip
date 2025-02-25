@@ -1,6 +1,5 @@
 /node_modules
 /coverage
-/package-lock.json
 /lib
 /recordings
 /docs/.vitepress/cache
