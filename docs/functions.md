@@ -49,3 +49,7 @@ recorder.stop();
 ::: danger
 Only set `force` to `true` when necessary, as `SIGKILL` immediately terminates the process without allowing FFmpeg to clean up resources, which may result in incomplete or corrupted recordings.
 :::
+
+---
+
+Now you're all set to create your own video recorder!

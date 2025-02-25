@@ -10,6 +10,8 @@ export default defineConfig({
   vite: {
     publicDir: 'static'
   },
+  cleanUrls: true,
+  lastUpdated: true,
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
@@ -32,6 +34,10 @@ export default defineConfig({
     socialLinks: [
       { icon: 'github', link: 'https://github.com/realyoterry/vidclip' }
     ],
+
+    editLink: {
+      pattern: 'https://github.com/realyoterry/vidclip/edit/main/docs/:path'
+    },
 
     logo: '/logo.png',
 
