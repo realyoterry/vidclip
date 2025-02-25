@@ -14,7 +14,7 @@ hero:
       link: /getting-started
     - theme: alt
       text: Why Vidclip?
-      link: /why
+      link: /about
     - theme: alt
       text: View on GitHub
       link: https://github.com/realyoterry/vidclip
