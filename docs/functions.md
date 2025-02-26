@@ -8,7 +8,7 @@
 
 Example usage:
 
-```js
+```javascript
 console.log(recorder.getConfig()); // current recorder configuration
 ```
 

@@ -35,7 +35,7 @@ Here's a quick example on how to use the basic features of this package.
 
 Make sure you have installed the package first.
 
-```js
+```javascript
 const { Recorder } = require('vidclip');
 
 // or if you use ESM:
@@ -46,7 +46,7 @@ import { Recorder } from 'vidclip';
 
 Here's a simple usage of the `start()` function:
 
-```js
+```javascript
 const recorder = new Recorder({
     resolution: '1920x1080', // {width}x{height}
     frameRate: 30, // one of 24, 30, 60 and 120

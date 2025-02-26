@@ -58,7 +58,7 @@ Higher resolutions produce better quality but may require more processing power 
 - **Default:** `30`
 
 Example usage:
-```js
+```javascript
 new Recorder({ frameRate: 60 });
 ```
 
@@ -82,7 +82,7 @@ new Recorder({ fileFormat: 'mov' });
 - **Default:** `undefined` (no audio recorded)
 
 Example usage:
-```js
+```javascript
 new Recorder({ audioSource: 'Stereo Mix (Realtek(R) Audio)' }); // windows
 ```
 
@@ -98,7 +98,7 @@ Make sure the audio source is the **exact** name as the audio device name.
 - **Default:** `"recordings/recording.{fileFormat}"`
 
 Example usage:
-```js
+```javascript
 new Recorder({ outputFile: "public/session.mov" });
 ```
 
@@ -114,7 +114,7 @@ The `{fileFormat}` placeholder is replaced with the selected fileFormat. if file
 - **Default:** `true`
 
 Example usage:
-```js
+```javascript
 const recorder = new Recorder({ replaceExisting: true });
 ```
 
@@ -131,7 +131,7 @@ If `false`, the recording will fail with an error if the file already exists.
 - **Default:** `false`
 
 Example usage:
-```js
+```javascript
 new Recorder({ verbose: true });
 ```
 
@@ -143,7 +143,7 @@ new Recorder({ verbose: true });
 - **Default:** `{ mode: "crf", value: 18 }`
 
 Example usage:
-```js
+```javascript
 const recorder = new Recorder({ rateControl: { mode: "bitrate", value: 5000 } });
 ```
 
@@ -155,7 +155,7 @@ const recorder = new Recorder({ rateControl: { mode: "bitrate", value: 5000 } })
 - **Default:** `"libx264"`
 
 Example usage:
-```js
+```javascript
 const recorder = new Recorder({ codec: "h264_nvenc" });
 ```
 
@@ -167,7 +167,7 @@ const recorder = new Recorder({ codec: "h264_nvenc" });
 - **Default:** `"fast"`
 
 Example usage:
-```js
+```javascript
 const recorder = new Recorder({ preset: "slower" });
 ```
 
@@ -179,7 +179,7 @@ const recorder = new Recorder({ preset: "slower" });
 - **Default:** `"yuv420p"`
 
 Example usage:
-```js
+```javascript
 const recorder = new Recorder({ pixelFormat: "rgb24" });
 ```
 
