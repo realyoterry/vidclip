@@ -18,6 +18,12 @@
 - Adjustable frame rate, resolution, bitrate and much more
 - Audio recording from microphone and/or system sound
 
+## Links
+
+- [Vidclip Documentation](https://vidclip.js.org)
+- [NPM Package](https://npmjs.com/package/vidclip)
+- [GitHub Repository](https://github.com/realyoterry/vidclip)
+
 ## Installation
 
 ```bash
@@ -29,7 +35,7 @@ bun add vidclip
 
 ## Usage
 
-Here's a quick example on how to use the basic features of this package.
+Here's a quick example on how to use the basic features of this package. Read the [Vidclip Documentation](https://vidclip.js.org/) for a full guide.
 
 ### 1. Import the application:
 
@@ -72,6 +78,10 @@ recorder.start({
  * }, 5000);
 */
 ```
+
+## Contributing
+
+To contribute, first read the [CONTRIBUTING.md](https://github.com/realyoterry/vidclip/blob/main/CONTRIBUTING.md) file. Then, fork the repository, apply your changes, and [create a pull request](https://github.com/realyoterry/windows-defender-disabler/pulls).
 
 ## License
 
