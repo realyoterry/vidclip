@@ -81,7 +81,7 @@ recorder.start({
 
 ## Contributing
 
-To contribute, first read the [CONTRIBUTING.md](https://github.com/realyoterry/vidclip/blob/main/CONTRIBUTING.md) file. Then, fork the repository, apply your changes, and [create a pull request](https://github.com/realyoterry/windows-defender-disabler/pulls).
+To contribute, first read the [CONTRIBUTING.md](https://github.com/realyoterry/vidclip/blob/main/CONTRIBUTING.md) file. Then, fork the repository, apply your changes, and [create a pull request](https://github.com/realyoterry/vidclip/pulls).
 
 ## License
 
