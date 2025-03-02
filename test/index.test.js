@@ -1,4 +1,4 @@
-const { Recorder }= require('../lib/index.js');
+const { Recorder } = require('../lib/index.js');
 const { spawn } = require('child_process');
 
 jest.mock('child_process', () => {
@@ -25,7 +25,7 @@ describe('Recorder Class', () => {
             frameRate: 30,
             fileFormat: 'mp4',
             replaceExisting: true,
-            verbose: false
+            verbose: false,
         });
     });
 
@@ -33,7 +33,7 @@ describe('Recorder Class', () => {
         expect(recorder.getConfig).toMatchObject({
             frameRate: 60,
             fileFormat: 'mp4',
-            verbose: true
+            verbose: true,
         });
     });
 
@@ -73,14 +73,16 @@ describe('Recorder Class', () => {
         recorder.start();
         expect(spawn().on).toHaveBeenCalledWith('error', expect.any(Function));
 
-        const errorHandler = spawn().on.mock.calls.find(call => call[0] === 'error')[1];
+        const errorHandler = spawn().on.mock.calls.find((call) => call[0] === 'error')[1];
         expect(() => errorHandler()).not.toThrow();
         expect(spawn().kill).toHaveBeenCalledWith('SIGKILL');
     });
 
     test('should catch and rethrow errors when starting the process', () => {
         const stopSpy = jest.spyOn(recorder, 'stop');
-        spawn.mockImplementation(() => { throw new Error('Spawn failed'); });
+        spawn.mockImplementation(() => {
+            throw new Error('Spawn failed');
+        });
         expect(() => recorder.start()).toThrow('Spawn failed');
         expect(stopSpy).toHaveBeenCalledWith(true);
     });

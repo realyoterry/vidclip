@@ -21,8 +21,27 @@ interface RecorderTypes {
         mode: 'crf' | 'cq' | 'bitrate' | 'qp';
         value: number;
     };
-    codec?: 'libx264' | 'libx265' | 'libvpx-vp9' | 'h264_nvenc' | 'hevc_nvenc' | 'h264_qsv' | 'hevc_qsv' | 'h264_amf' | 'hevc_amf';
-    preset?: 'placebo' | 'veryslow' | 'slower' | 'slow' | 'medium' | 'fast' | 'faster' | 'veryfast' | 'superfast' | 'ultrafast';
+    codec?:
+        | 'libx264'
+        | 'libx265'
+        | 'libvpx-vp9'
+        | 'h264_nvenc'
+        | 'hevc_nvenc'
+        | 'h264_qsv'
+        | 'hevc_qsv'
+        | 'h264_amf'
+        | 'hevc_amf';
+    preset?:
+        | 'placebo'
+        | 'veryslow'
+        | 'slower'
+        | 'slow'
+        | 'medium'
+        | 'fast'
+        | 'faster'
+        | 'veryfast'
+        | 'superfast'
+        | 'ultrafast';
     pixelFormat?: 'yuv420p' | 'yuv422p' | 'yuv444p' | 'rgb24' | 'gray' | 'nv12';
 }
 
