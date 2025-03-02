@@ -6,8 +6,9 @@ is a great boon to your development process.
 
 To get ready to work on the codebase, please do the following:
 
-1. Fork & clone the repository, and make sure you're on the **beta** branch
-2. Run `npm install` or `npm build` to install packages
+1. Fork & clone the repository
+2. Run `npm install` to install packages
 4. Code your heart out
-5. Run `npm test` to run Jest and Prettier and ensure any JSDoc changes are valid
-6. [Submit a pull request](https://github.com/realyoterry/vidclip/compare) (Make sure you follow the [conventional commit format](https://github.com/realyoterry/vidclip/blob/main/COMMIT_CONVENTION.md))
+5. Run `npm build` to build TypeScript
+6. Run `npm test` to run Jest and Prettier
+7. [Submit a pull request](https://github.com/realyoterry/vidclip/compare) (Make sure you follow the [conventional commit format](https://github.com/realyoterry/vidclip/blob/main/COMMIT_CONVENTION.md))
