@@ -11,4 +11,4 @@ To get ready to work on the codebase, please do the following:
 4. Code your heart out
 5. Run `npm build` to build TypeScript
 6. Run `npm test` to run Jest and Prettier
-7. [Submit a pull request](https://github.com/realyoterry/vidclip/compare) (Make sure you follow the [conventional commit format](https://github.com/realyoterry/vidclip/blob/main/COMMIT_CONVENTION.md))
+7. [Submit a pull request](https://github.com/realyoterry/vidclip/pulls)
