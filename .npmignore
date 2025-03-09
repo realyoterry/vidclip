@@ -5,7 +5,6 @@
 /tsconfig.json
 /package-lock.json
 /SECURITY.md
-/LICENSE
 /docs
 /src
 /.prettierrc
@@ -19,3 +18,5 @@
 /tsconfig.json
 /tsconfig.esm.json
 /tsconfig.cjs.json
+/CNAME
+/.vercelignore
